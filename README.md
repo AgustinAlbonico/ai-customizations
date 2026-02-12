@@ -12,6 +12,39 @@ hooks/                      # hooks reutilizables
 scripts/                    # scripts de bootstrap/instalacion
 ```
 
+## Resumen rapido del skill
+
+Skill principal: `tauri-react-nest-lan-migration`.
+
+### Que hace
+
+- Guia migraciones Web -> Desktop con Tauri para stack React + NestJS + Postgres en LAN.
+- Estandariza setup, sidecar, validacion y salida a release.
+- Reduce errores comunes de red local, auth y arranque.
+
+### Como funciona
+
+1. Planifica la migracion (`/tauri-migrate-plan`).
+2. Implementa cambios (`/tauri-migrate-implement`).
+3. Verifica setup/login/CRUD + logs (`/tauri-migrate-verify`).
+4. Prepara entrega (`/tauri-migrate-release`).
+
+Alias corto disponible: `tauri-migration`.
+
+### Ejemplo practico
+
+Instalar solo este skill para Claude Code:
+
+```powershell
+npx skills add AgustinAlbonico/ai-customizations --skill tauri-react-nest-lan-migration --agent claude-code -y
+```
+
+Luego usarlo con un prompt directo:
+
+```text
+Aplicar el skill tauri-react-nest-lan-migration para migrar mi app React + NestJS a Tauri en LAN. Empezar por plan, luego implementacion y verificacion.
+```
+
 ## Instalacion de skills (cualquier agente)
 
 Listar skills disponibles:

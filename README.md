@@ -1,22 +1,18 @@
 # ai-customizations
 
-Infraestructura personal de IA: skills, agentes, hooks y comandos versionados en un solo repo, con instalacion reproducible para OpenCode/Codex mediante `npx skills` y scripts de bootstrap.
+Infraestructura personal de IA: skills, agentes, hooks y comandos versionados en un solo repo, con instalacion reproducible y arquitectura agnostica de agente.
 
 ## Arquitectura
 
 ```text
-skills/                     # skills instalables con npx skills
-agents/                     # instrucciones base por agente
-  opencode/
-  codex/
-hooks/                      # hooks reutilizables
-  opencode/
+skills/                     # skills instalables con npx skills (cross-agent)
+agents/                     # definiciones de agentes reutilizables
 commands/                   # comandos markdown reutilizables
-  opencode/
+hooks/                      # hooks reutilizables
 scripts/                    # scripts de bootstrap/instalacion
 ```
 
-## Instalacion de skills con npx
+## Instalacion de skills (cualquier agente)
 
 Listar skills disponibles:
 
@@ -24,30 +20,42 @@ Listar skills disponibles:
 npx skills add AgustinAlbonico/ai-customizations --list
 ```
 
-Instalar todas las skills para OpenCode:
+Instalar todas las skills para un agente especifico:
 
 ```powershell
-npx skills add AgustinAlbonico/ai-customizations --skill '*' --agent opencode -y
+npx skills add AgustinAlbonico/ai-customizations --skill '*' --agent <agent-name> -y
 ```
 
-Instalar todas las skills para Codex:
+Ejemplos de `<agent-name>`: `opencode`, `codex`, `claude-code`, `cursor`, `antigravity`.
+
+Instalar skills para multiples agentes en un solo comando:
 
 ```powershell
-npx skills add AgustinAlbonico/ai-customizations --skill '*' --agent codex -y
+npx skills add AgustinAlbonico/ai-customizations --skill '*' --agent opencode --agent codex --agent claude-code -y
 ```
 
-## Bootstrap de proyecto (OpenCode)
-
-Para copiar comandos/hooks/instrucciones al proyecto actual y luego instalar skills locales:
+Instalar skills para todos los agentes detectados:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install-opencode-project.ps1 -ProjectPath "C:\ruta\tu-proyecto"
+npx skills add AgustinAlbonico/ai-customizations --all
 ```
 
-## Bootstrap de skills para Codex
+## Script de instalacion agnostico
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install-codex-skills.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\install-skills.ps1 -Source AgustinAlbonico/ai-customizations -Agents opencode,codex,claude-code
+```
+
+Para instalar todas las skills de todos los agentes en modo global:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-skills.ps1 -Source AgustinAlbonico/ai-customizations -AllAgents -GlobalSkills
+```
+
+## Bootstrap opcional de proyecto
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\bootstrap-project.ps1 -ProjectPath "C:\ruta\tu-proyecto"
 ```
 
 ## Validacion local

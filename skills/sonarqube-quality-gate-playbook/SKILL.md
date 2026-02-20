@@ -54,6 +54,70 @@ No aceptar tests que solo suben porcentaje sin validar comportamiento:
 
 ## Pipeline del skill (paso a paso)
 
+## Runbook de discrepancia de cobertura (caso reutilizable)
+
+Usar este runbook cuando SonarQube muestre cobertura mucho menor a la local.
+
+### Sintoma tipico
+
+- Local (Jest/Vitest): cobertura alta (por ejemplo >90%)
+- SonarQube: cobertura sensiblemente menor (por ejemplo 40-60%)
+
+### Causas raiz frecuentes
+
+1. Rutas `SF:` con backslashes (`\\`) en `lcov.info` generadas en Windows.
+2. SonarQube ejecutando en Linux/containers sin poder mapear rutas con `\\`.
+3. Packages compartidos con cobertura baja (ejemplo `packages/utils`) tirando abajo el global.
+
+### Diagnostico rapido
+
+1. Revisar primeras entradas `SF:` del `lcov.info` de cada app/package.
+2. Verificar en logs de `sonar-scanner` si hay archivos de coverage no mapeados o ignorados.
+3. Comparar cobertura por modulo (backend/frontend/packages) para detectar outliers.
+
+Comandos sugeridos:
+
+```powershell
+Get-Content "apps\\backend\\coverage\\lcov.info" | Select-String "^SF:" | Select-Object -First 10
+Get-Content "apps\\frontend\\coverage\\lcov.info" | Select-String "^SF:" | Select-Object -First 10
+```
+
+Si aparecen rutas como `SF:src\\app.ts`, normalizar antes del scan.
+
+### Remediacion recomendada
+
+1. Normalizar rutas a forward slash (`/`) en todos los `lcov.info` antes de `sonar-scanner`.
+2. Re-ejecutar tests de coverage y scan.
+3. Subir cobertura del paquete/modulo de menor porcentaje para no sesgar el global.
+
+Ejemplo portable (`scripts/fix-lcov-paths.js`):
+
+```js
+const fs = require('node:fs');
+
+const reports = [
+  'apps/backend/coverage/lcov.info',
+  'apps/frontend/coverage/lcov.info',
+  'packages/utils/coverage/lcov.info'
+];
+
+for (const reportPath of reports) {
+  if (!fs.existsSync(reportPath)) continue;
+  const content = fs.readFileSync(reportPath, 'utf8');
+  const normalized = content.replace(/\\\\/g, '/');
+  fs.writeFileSync(reportPath, normalized);
+}
+```
+
+Guardrail CI (fallar si quedan backslashes):
+
+```bash
+if grep -q 'SF:.*\\\\' apps/backend/coverage/lcov.info; then
+  echo "ERROR: Backslashes encontrados en lcov.info"
+  exit 1
+fi
+```
+
 ### Paso 1: Detectar gap actual
 
 1. Ejecutar tests con coverage en backend/frontend/packages relevantes
@@ -88,6 +152,9 @@ Crear o actualizar `sonar-project.properties` en raiz con rutas reales del monor
 - Verificar existencia de `lcov.info`
 - Configurar `sonar.javascript.lcov.reportPaths` con todas las rutas
 - Validar en logs del scanner que no haya warnings de coverage faltante
+- Verificar que lineas `SF:` usen `/` y no `\\`
+- Si hay entorno mixto Windows/Linux, correr normalizacion de paths antes del scan
+- Confirmar que packages compartidos relevantes tambien reporten coverage (no solo apps)
 
 ### Paso 4: Ejecutar tests de forma consistente
 
@@ -285,6 +352,16 @@ jobs:
       - name: Frontend tests with coverage
         run: bun run --cwd apps/frontend test -- --coverage
 
+      - name: Normalize lcov paths (Windows/Linux safe)
+        run: node scripts/fix-lcov-paths.js
+
+      - name: Validate lcov path format
+        run: |
+          if grep -q 'SF:.*\\\\' apps/backend/coverage/lcov.info; then
+            echo "ERROR: Backslashes encontrados en backend lcov.info"
+            exit 1
+          fi
+
       - name: Build
         run: bun run build
 
@@ -316,6 +393,7 @@ test_and_build:
     - bun install --frozen-lockfile
     - bun run --cwd apps/backend test -- --coverage
     - bun run --cwd apps/frontend test -- --coverage
+    - node scripts/fix-lcov-paths.js
     - bun run build
   artifacts:
     when: always
@@ -358,6 +436,8 @@ Comandos base:
 - [ ] Tests con caso feliz, negativo y borde
 - [ ] Build y CI en verde
 - [ ] Evidencia de Sonar adjunta
+- [ ] `lcov.info` sin backslashes en lineas `SF:`
+- [ ] Packages compartidos sin brecha fuerte de coverage
 
 ## Plantillas de comandos listas para pegar
 

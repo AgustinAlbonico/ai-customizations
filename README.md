@@ -12,66 +12,138 @@ hooks/                      # hooks reutilizables
 scripts/                    # scripts de bootstrap/instalacion
 ```
 
-## Resumen rapido del skill
+## Skills disponibles
 
-Skill principal: `tauri-react-nest-lan-migration`.
+### `interactive-bug` - Debug interactivo
 
-### Que hace
+**Que hace:**
+- Debug interactivo de bugs con preguntas adaptativas
+- La IA te pregunta lo que necesita (multiple choice o abiertas)
+- Arregla en un solo intento sin back-and-forth
 
-- Guia migraciones Web -> Desktop con Tauri para stack React + NestJS + Postgres en LAN.
-- Estandariza setup, sidecar, validacion y salida a release.
-- Reduce errores comunes de red local, auth y arranque.
+**Cuando usarlo:**
+- Encontraste un bug pero no queres escribir un reporte detallado
+- Queres que la IA te guíe con preguntas específicas
+- Necesitas arreglar algo rapido sin pensar en el contexto
 
-### Como funciona
+**Como usarlo:**
+```
+/bug "descripcion corta del problema"
+```
 
-1. Planifica la migracion (`/tauri-migrate-plan`).
-2. Implementa cambios (`/tauri-migrate-implement`).
-3. Verifica setup/login/CRUD + logs (`/tauri-migrate-verify`).
-4. Prepara entrega (`/tauri-migrate-release`).
+**Ejemplo:**
+```
+/bug "el boton de logout no anda"
+```
 
-Alias corto disponible: `tauri-migration`.
+La IA te va a preguntar:
+- ¿Qué pasa exactamente cuando haces click?
+- ¿Dónde está el botón?
+- ¿Funcionaba antes?
 
-### Ejemplo practico
+Vos respondes (elegis opciones o escribis), y la IA investiga y arregla.
 
-Instalar solo este skill para Claude Code:
+---
+
+### `interactive-task` - Tareas interactivas
+
+**Que hace:**
+- Tareas interactivas (features, cambios, refactors) con preguntas adaptativas
+- La IA identifica el tipo de tarea y hace las preguntas correctas
+- Ejecuta correctamente en un solo intento
+
+**Cuando usarlo:**
+- Queres agregar/modificar/refactorizar algo
+- No queres escribir especificaciones detalladas
+- Preferis que la IA te pregunte lo que necesita
+
+**Como usarlo:**
+```
+/task "descripcion de la tarea"
+```
+
+**Ejemplos:**
+```
+/task "agregar dark mode"
+/task "refactorizar el componente de login"
+/task "cambiar el orden de las columnas en la tabla"
+```
+
+La IA identifica si es NUEVO, CAMBIO, REFACTOR, CONFIG o MEJORA, y hace preguntas adaptadas.
+
+---
+
+### `tauri-react-nest-lan-migration` - Migracion Tauri
+
+**Que hace:**
+- Guia migraciones Web -> Desktop con Tauri para stack React + NestJS + Postgres en LAN
+- Estandariza setup, sidecar, validacion y salida a release
+- Reduce errores comunes de red local, auth y arranque
+
+**Como funciona:**
+1. Planifica la migracion (`/tauri-migrate-plan`)
+2. Implementa cambios (`/tauri-migrate-implement`)
+3. Verifica setup/login/CRUD + logs (`/tauri-migrate-verify`)
+4. Prepara entrega (`/tauri-migrate-release`)
+
+---
+
+### `sonarqube-quality-gate-playbook` - SonarQube
+
+Playbook iterativo para llevar proyectos Node y TypeScript (NestJS + React en monorepo) a cumplir Quality Gates de SonarQube.
+
+## Instalacion
+
+### Opcion 1: Instalar skills individuales
 
 ```powershell
-npx skills add AgustinAlbonico/ai-customizations --skill tauri-react-nest-lan-migration --agent claude-code -y
+# Bug interactivo
+npx skills add AgustinAlbonico/ai-customizations --skill interactive-bug --agent opencode -y
+
+# Task interactivo
+npx skills add AgustinAlbonico/ai-customizations --skill interactive-task --agent opencode -y
+
+# Tauri migration
+npx skills add AgustinAlbonico/ai-customizations --skill tauri-react-nest-lan-migration --agent opencode -y
+
+# SonarQube
+npx skills add AgustinAlbonico/ai-customizations --skill sonarqube-quality-gate-playbook --agent opencode -y
 ```
 
-Luego usarlo con un prompt directo:
+### Opcion 2: Instalar todas las skills
 
-```text
-Aplicar el skill tauri-react-nest-lan-migration para migrar mi app React + NestJS a Tauri en LAN. Empezar por plan, luego implementacion y verificacion.
+```powershell
+# Para un agente especifico
+npx skills add AgustinAlbonico/ai-customizations --skill '*' --agent opencode -y
+
+# Para multiples agentes
+npx skills add AgustinAlbonico/ai-customizations --skill '*' --agent opencode --agent claude-code -y
+
+# Para todos los agentes detectados
+npx skills add AgustinAlbonico/ai-customizations --all
 ```
 
-## Instalacion de skills (cualquier agente)
-
-Listar skills disponibles:
+### Opcion 3: Listar skills disponibles
 
 ```powershell
 npx skills add AgustinAlbonico/ai-customizations --list
 ```
 
-Instalar todas las skills para un agente especifico:
+### Agentes soportados
 
-```powershell
-npx skills add AgustinAlbonico/ai-customizations --skill '*' --agent <agent-name> -y
+`opencode`, `codex`, `claude-code`, `cursor`, `antigravity`
+
+## Uso rapido
+
+Despues de instalar, usa los comandos:
+
+```text
+/bug "el carrito no actualiza el total"
+/task "agregar dark mode"
+/task "refactorizar el login"
 ```
 
-Ejemplos de `<agent-name>`: `opencode`, `codex`, `claude-code`, `cursor`, `antigravity`.
-
-Instalar skills para multiples agentes en un solo comando:
-
-```powershell
-npx skills add AgustinAlbonico/ai-customizations --skill '*' --agent opencode --agent codex --agent claude-code -y
-```
-
-Instalar skills para todos los agentes detectados:
-
-```powershell
-npx skills add AgustinAlbonico/ai-customizations --all
-```
+La IA va a hacerte preguntas interactivas con opciones multiple choice o abiertas según lo que necesite saber.
 
 ## Script de instalacion agnostico
 
@@ -99,5 +171,5 @@ npx skills add . --list
 
 ## Notas
 
-- Cada skill debe tener `SKILL.md` con frontmatter YAML valido (`name` + `description`).
-- Este repo guarda customizaciones de IA, no codigo de producto.
+- Cada skill debe tener `SKILL.md` con frontmatter YAML valido (`name` + `description`)
+- Este repo guarda customizaciones de IA, no codigo de producto

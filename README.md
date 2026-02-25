@@ -92,6 +92,34 @@ La IA identifica si es NUEVO, CAMBIO, REFACTOR, CONFIG o MEJORA, y hace pregunta
 
 Playbook iterativo para llevar proyectos Node y TypeScript (NestJS + React en monorepo) a cumplir Quality Gates de SonarQube.
 
+---
+
+### `e2e-qa-tester` - Pruebas E2E/QA Manual
+
+**Que hace:**
+- Ejecuta pruebas E2E y QA manual usando Playwright MCP
+- Verifica la ultima funcionalidad implementada
+- Busca credenciales en CREDENTIALS.md automaticamente
+- Pide confirmacion antes de ejecutar pruebas
+
+**Cuando usarlo:**
+- Acabas de implementar una funcionalidad y queres verificarla
+- Necesitas hacer QA manual de un flujo
+- Queres probar formularios, autenticacion, o CRUD
+
+**Como usarlo:**
+```
+/qa
+```
+
+**Flujo:**
+1. Identifica la ultima tarea completada
+2. Busca credenciales en CREDENTIALS.md
+3. Verifica conexion al puerto 5173
+4. Te presenta el plan de prueba
+5. Ejecuta y reporta resultados (PASO/FALLO)
+
+
 ## Instalacion
 
 ### Opcion 1: Instalar skills individuales
@@ -106,9 +134,8 @@ npx skills add AgustinAlbonico/ai-customizations --skill interactive-task --agen
 # Tauri migration
 npx skills add AgustinAlbonico/ai-customizations --skill tauri-react-nest-lan-migration --agent opencode -y
 
-# SonarQube
-npx skills add AgustinAlbonico/ai-customizations --skill sonarqube-quality-gate-playbook --agent opencode -y
-```
+# QA E2E
+npx skills add AgustinAlbonico/ai-customizations --skill e2e-qa-tester --agent opencode -y
 
 ### Opcion 2: Instalar todas las skills
 
@@ -140,8 +167,7 @@ Despues de instalar, usa los comandos:
 ```text
 /bug "el carrito no actualiza el total"
 /task "agregar dark mode"
-/task "refactorizar el login"
-```
+/qa    # Prueba la ultima funcionalidad implementada
 
 La IA va a hacerte preguntas interactivas con opciones multiple choice o abiertas según lo que necesite saber.
 

@@ -1,6 +1,6 @@
 ---
 name: e2e-qa-tester
-description: Ejecuta pruebas E2E y QA manual usando Playwright MCP para verificar la ultima tarea completada en la conversacion. Usar cuando se necesite: (1) Probar un flujo recien implementado, (2) Verificar que una funcionalidad funciona correctamente, (3) Hacer QA manual de una nueva feature, (4) Testear formularios, flujos de autenticacion, o cualquier interaccion de usuario. El skill busca credenciales en CREDENTIALS.md, intenta conectar al puerto 5173 por defecto, y pide confirmacion antes de ejecutar las pruebas.
+description: "Ejecuta pruebas E2E y QA manual usando Playwright MCP para verificar la ultima tarea completada en la conversacion. Usar cuando se necesite: (1) Probar un flujo recien implementado, (2) Verificar que una funcionalidad funciona correctamente, (3) Hacer QA manual de una nueva feature, (4) Testear formularios, flujos de autenticacion, o cualquier interaccion de usuario. El skill busca credenciales en CREDENTIALS.md, intenta conectar al puerto 5173 por defecto, y pide confirmacion antes de ejecutar las pruebas."
 ---
 
 # E2E QA Tester

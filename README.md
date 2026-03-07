@@ -73,6 +73,33 @@ La IA identifica si es NUEVO, CAMBIO, REFACTOR, CONFIG o MEJORA, y hace pregunta
 
 ---
 
+### `prd-creator` - Generador de PRDs interactivo
+
+**Que hace:**
+- Genera Product Requirements Documents (PRDs) completos a partir de una conversacion interactiva
+- Clasifica la complejidad del problema y adapta la cantidad de preguntas (0 a 20)
+- Output orientado a problemas de negocio y requisitos (NO tecnico, sin stacks especificos)
+- Guarda el PRD en `docs/prd/YYYY-MM-DD-<nombre>.md`
+
+**Cuando usarlo:**
+- Queres documentar requisitos antes de empezar a construir
+- Tenes una idea o problema y queres un PRD estructurado
+- Necesitas alinear equipo sobre que se va a construir y por que
+
+**Como usarlo:**
+```
+/prd "descripcion del problema o idea"
+```
+
+**Ejemplo:**
+```
+/prd "necesito un sistema de notificaciones para mi app"
+```
+
+La IA explora el contexto del proyecto, te hace preguntas adaptativas segun la complejidad, y genera un PRD completo en `docs/prd/`.
+
+---
+
 ### `tauri-react-nest-lan-migration` - Migracion Tauri
 
 **Que hace:**
@@ -137,6 +164,9 @@ npx skills add AgustinAlbonico/ai-customizations --skill tauri-react-nest-lan-mi
 # QA E2E
 npx skills add AgustinAlbonico/ai-customizations --skill e2e-qa-tester --agent opencode -y
 
+# PRD Creator
+npx skills add AgustinAlbonico/ai-customizations --skill prd-creator --agent opencode -y
+
 ### Opcion 2: Instalar todas las skills
 
 ```powershell
@@ -168,6 +198,7 @@ Despues de instalar, usa los comandos:
 /bug "el carrito no actualiza el total"
 /task "agregar dark mode"
 /qa    # Prueba la ultima funcionalidad implementada
+/prd "necesito un sistema de notificaciones"  # Genera un PRD interactivo
 
 La IA va a hacerte preguntas interactivas con opciones multiple choice o abiertas según lo que necesite saber.
 

@@ -100,6 +100,45 @@ La IA explora el contexto del proyecto, te hace preguntas adaptativas segun la c
 
 ---
 
+### `project-starter` - Definicion tecnica y bootstrap de proyectos
+
+**Que hace:**
+- Guia interactiva para definir tecnica y funcionalmente un proyecto desde cero
+- Recorre desde la vision del producto hasta el bootstrap de la estructura inicial
+- Usa preguntas adaptativas organizadas en 6 fases progresivas
+- Integra Context7 MCP para recomendar librerias y herramientas actualizadas
+- Genera documento de decisiones tecnicas y estructura inicial del proyecto
+
+**Cuando usarlo:**
+- Queres arrancar un proyecto nuevo desde cero con criterio
+- Necesitas definir stack tecnico con trade-offs claros
+- Queres que la IA actue como arquitecto tecnico guiandote paso a paso
+- Necesitas generar la estructura base respetando las decisiones tomadas
+
+**Como usarlo:**
+```
+/project-starter "descripcion corta del proyecto"
+```
+
+**Ejemplos:**
+```
+/project-starter "SaaS de gestion de inventario para PyMEs"
+/project-starter "API REST para sistema de reservas de hotel"
+/project-starter "aplicacion mobile-first para delivery de comida"
+```
+
+**Flujo:**
+1. Descubrimiento del proyecto (vision, usuarios, complejidad)
+2. Arquitectura de alto nivel (monorepo/multirepo, patron, despliegue)
+3. Stack principal (frameworks, DB, ORM, auth, testing) — con Context7
+4. Implementacion detallada (UI, seguridad, logging, CI/CD) — con Context7
+5. Generacion del documento de decisiones tecnicas
+6. Bootstrap / inicializacion de la estructura del proyecto
+
+La IA adapta la profundidad de preguntas segun la clasificacion: MVP (8-12 preguntas), producto interno (12-18), producto escalable (18-28).
+
+---
+
 ### `tauri-react-nest-lan-migration` - Migracion Tauri
 
 **Que hace:**
@@ -112,6 +151,28 @@ La IA explora el contexto del proyecto, te hace preguntas adaptativas segun la c
 2. Implementa cambios (`/tauri-migrate-implement`)
 3. Verifica setup/login/CRUD + logs (`/tauri-migrate-verify`)
 4. Prepara entrega (`/tauri-migrate-release`)
+
+---
+
+### `agentmd-generator` - Generador de AGENTS.md jerarquico
+
+**Que hace:**
+- Analiza la estructura del repositorio (simple, monorepo, multi-proyecto)
+- Detecta stack, frameworks, fronteras naturales entre componentes
+- Hace preguntas adaptativas (multiple choice con opcion libre) para entender necesidades
+- Busca y reutiliza skills existentes antes de proponer nuevos
+- Genera AGENTS.md raiz + locales optimizados para consumo minimo de contexto
+
+**Cuando usarlo:**
+- Estas configurando un proyecto nuevo para desarrollo con IA
+- Tu AGENTS.md crecio demasiado y necesita reestructurarse
+- Tenes un monorepo que necesita contexto separado por componente
+- Queres que cada sesion de IA cargue solo el contexto que necesita
+
+**Como usarlo:**
+```
+/agentmd
+```
 
 ---
 
@@ -167,6 +228,9 @@ npx skills add AgustinAlbonico/ai-customizations --skill e2e-qa-tester --agent o
 # PRD Creator
 npx skills add AgustinAlbonico/ai-customizations --skill prd-creator --agent opencode -y
 
+# Init Deep (AGENTS.md jerarquico)
+npx skills add AgustinAlbonico/ai-customizations --skill agentmd-generator --agent opencode -y
+
 ### Opcion 2: Instalar todas las skills
 
 ```powershell
@@ -199,6 +263,7 @@ Despues de instalar, usa los comandos:
 /task "agregar dark mode"
 /qa    # Prueba la ultima funcionalidad implementada
 /prd "necesito un sistema de notificaciones"  # Genera un PRD interactivo
+/init-deep                                    # Genera AGENTS.md jerarquico (alias de /agentmd)
 
 La IA va a hacerte preguntas interactivas con opciones multiple choice o abiertas según lo que necesite saber.
 

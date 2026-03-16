@@ -207,6 +207,29 @@ Playbook iterativo para llevar proyectos Node y TypeScript (NestJS + React en mo
 4. Te presenta el plan de prueba
 5. Ejecuta y reporta resultados (PASO/FALLO)
 
+---
+
+### `qa` - Alias para E2E/QA
+
+Alias corto de `e2e-qa-tester`. Ejecuta el mismo flujo con menos typing.
+
+**Como usarlo:**
+```
+/qa
+```
+
+---
+
+### `tauri-migration` - Alias para Migracion Tauri
+
+Alias corto de `tauri-react-nest-lan-migration`. Ejecuta el mismo flujo de migracion Web -> Desktop.
+
+**Como usarlo:**
+```
+/tauri-migration
+```
+
+---
 
 ## Instalacion
 
@@ -230,6 +253,10 @@ npx skills add AgustinAlbonico/ai-customizations --skill prd-creator --agent ope
 
 # Init Deep (AGENTS.md jerarquico)
 npx skills add AgustinAlbonico/ai-customizations --skill agentmd-generator --agent opencode -y
+
+# Project Starter
+npx skills add AgustinAlbonico/ai-customizations --skill project-starter --agent opencode -y
+```
 
 ### Opcion 2: Instalar todas las skills
 
@@ -263,7 +290,9 @@ Despues de instalar, usa los comandos:
 /task "agregar dark mode"
 /qa    # Prueba la ultima funcionalidad implementada
 /prd "necesito un sistema de notificaciones"  # Genera un PRD interactivo
-/init-deep                                    # Genera AGENTS.md jerarquico (alias de /agentmd)
+/agentmd                                      # Genera AGENTS.md jerarquico
+/project-starter "descripcion"                # Bootstrap de proyecto nuevo
+```
 
 La IA va a hacerte preguntas interactivas con opciones multiple choice o abiertas según lo que necesite saber.
 

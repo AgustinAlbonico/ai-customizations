@@ -6,6 +6,45 @@ Todas las preguntas se hacen con la herramienta `question`. Mezclar preguntas co
 
 ---
 
+## Regla de foco (OBLIGATORIA)
+
+Antes de elegir preguntas, construir `brief de foco` con:
+
+- Pedido exacto del usuario.
+- In-scope (qué parte del sistema sí entra).
+- Out-of-scope (qué no entra salvo pedido explícito).
+- Gaps reales de información.
+
+Solo se permiten preguntas que cierren un gap real del brief.
+
+### Filtro rápido por pregunta
+
+Una pregunta entra solo si cumple TODO:
+
+1. Está directamente conectada con el pedido.
+2. No está ya respondida por el usuario o por la exploración del codebase.
+3. Cambia una decisión del PRD (alcance, requisito o criterio de éxito).
+4. No abre un frente lateral que el usuario no pidió.
+
+Si falla un punto, se descarta.
+
+---
+
+## Modo sistema existente — Preguntas delta (prioridad alta)
+
+Si ya hay producto funcionando, priorizar estas preguntas sobre las genéricas.
+
+| # | Pregunta | Tipo | Cuándo usar |
+|---|----------|------|-------------|
+| D1 | Hoy en `[flujo/módulo detectado]` pasa `[comportamiento actual]`. ¿Qué querés que cambie exactamente? | Abierta | Siempre en sistema existente |
+| D2 | ¿Qué parte del comportamiento actual debe mantenerse igual sí o sí? | Abierta | Siempre en sistema existente |
+| D3 | ¿Qué usuarios/roles se ven afectados por este cambio puntual? | Con opciones + abierta | Si hay múltiples actores |
+| D4 | ¿Cuál es el dolor principal del flujo actual que este cambio tiene que resolver primero? | Abierta | Siempre si hay flujo actual |
+| D5 | Para esta versión, ¿qué dejamos explícitamente afuera en este módulo/flujo? | Abierta | Siempre recomendado |
+| D6 | ¿Hay alguna regla de negocio existente que no podamos romper con este cambio? | Abierta | Si se detectan reglas actuales |
+
+---
+
 ## Pilar 1 — Problema y Contexto (Ronda 1)
 
 Preguntas para entender el "por qué".
@@ -153,7 +192,11 @@ Solo si complejidad >= alta.
 
 ## Preguntas de descubrimiento (input vago)
 
-Cuando el usuario da un input muy vago (<30 palabras), usar estas preguntas amplias para empezar:
+Solo usar esta sección cuando el input es muy vago (<30 palabras) **y** no hay suficiente contexto del sistema para acotar.
+
+Si ya existe sistema y el pedido apunta a un flujo concreto, usar primero preguntas delta (D1-D6).
+
+Cuando aplica, usar estas preguntas para arrancar:
 
 ```
 Pregunta 1: "¿Qué aspecto específico querés resolver?"
@@ -173,3 +216,15 @@ Pregunta 4: "¿Tenés una idea de qué debería hacer, o querés que exploremos 
 - Tengo una idea vaga, ayudame a definirla
 - Solo sé que hay un problema, exploremos
 ```
+
+---
+
+## Anti-patrón: preguntas demasiado amplias
+
+Evitar preguntas genéricas que no cierran gaps del pedido.
+
+| Evitar | Mejor (enfocada) |
+|--------|------------------|
+| "¿Qué querés construir?" | "En el flujo de checkout que detecté, ¿querés resolver abandono o errores de pago?" |
+| "¿Quiénes usarían el sistema?" | "Para este cambio en notificaciones, ¿impacta solo cliente final o también soporte interno?" |
+| "¿Qué restricciones tenés?" | "Para este módulo de facturación, ¿hay una fecha límite legal o contractual que condicione el alcance?" |

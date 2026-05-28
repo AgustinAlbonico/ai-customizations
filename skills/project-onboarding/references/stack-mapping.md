@@ -104,7 +104,7 @@ Estas skills se recomiendan para cualquier proyecto:
 | Skill | Scope | Descripción |
 |-------|-------|-------------|
 | `sonarqube-quality-gate-playbook` | root | Mejora calidad de código |
-| `e2e-qa-tester` | root | Testing E2E automatizado |
+
 | `interactive-bug` | root | Diagnóstico de bugs |
 | `interactive-task` | root | Clarificación de tareas |
 

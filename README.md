@@ -162,21 +162,6 @@ Manual completo: [`docs/project-onboarding-skill-sync.md`](docs/project-onboardi
 
 ---
 
-### `tauri-react-nest-lan-migration` - Migracion Tauri
-
-**Que hace:**
-- Guia migraciones Web -> Desktop con Tauri para stack React + NestJS + Postgres en LAN
-- Estandariza setup, sidecar, validacion y salida a release
-- Reduce errores comunes de red local, auth y arranque
-
-**Como funciona:**
-1. Planifica la migracion (`/tauri-migrate-plan`)
-2. Implementa cambios (`/tauri-migrate-implement`)
-3. Verifica setup/login/CRUD + logs (`/tauri-migrate-verify`)
-4. Prepara entrega (`/tauri-migrate-release`)
-
----
-
 ### `agentmd-generator` - Generador de AGENTS.md jerarquico
 
 **Que hace:**
@@ -202,44 +187,6 @@ Manual completo: [`docs/project-onboarding-skill-sync.md`](docs/project-onboardi
 ### `sonarqube-quality-gate-playbook` - SonarQube
 
 Playbook iterativo para llevar proyectos Node y TypeScript (NestJS + React en monorepo) a cumplir Quality Gates de SonarQube.
-
----
-
-### `e2e-qa-tester` - Pruebas E2E/QA Manual
-
-**Que hace:**
-- Ejecuta pruebas E2E y QA manual usando Playwright MCP
-- Verifica la ultima funcionalidad implementada
-- Busca credenciales en CREDENTIALS.md automaticamente
-- Pide confirmacion antes de ejecutar pruebas
-
-**Cuando usarlo:**
-- Acabas de implementar una funcionalidad y queres verificarla
-- Necesitas hacer QA manual de un flujo
-- Queres probar formularios, autenticacion, o CRUD
-
-**Como usarlo:**
-```
-/qa
-```
-
-**Flujo:**
-1. Identifica la ultima tarea completada
-2. Busca credenciales en CREDENTIALS.md
-3. Verifica conexion al puerto 5173
-4. Te presenta el plan de prueba
-5. Ejecuta y reporta resultados (PASO/FALLO)
-
----
-
-### `qa` - Alias para E2E/QA
-
-Alias corto de `e2e-qa-tester`. Ejecuta el mismo flujo con menos typing.
-
-**Como usarlo:**
-```
-/qa
-```
 
 ---
 
@@ -300,17 +247,6 @@ npx skills add AgustinAlbonico/ai-customizations --skill skill-sync --agent open
 
 ---
 
-### `tauri-migration` - Alias para Migracion Tauri
-
-Alias corto de `tauri-react-nest-lan-migration`. Ejecuta el mismo flujo de migracion Web -> Desktop.
-
-**Como usarlo:**
-```
-/tauri-migration
-```
-
----
-
 ## Instalacion
 
 ### Opcion 1: Instalar skills individuales
@@ -321,12 +257,6 @@ npx skills add AgustinAlbonico/ai-customizations --skill interactive-bug --agent
 
 # Task interactivo
 npx skills add AgustinAlbonico/ai-customizations --skill interactive-task --agent opencode -y
-
-# Tauri migration
-npx skills add AgustinAlbonico/ai-customizations --skill tauri-react-nest-lan-migration --agent opencode -y
-
-# QA E2E
-npx skills add AgustinAlbonico/ai-customizations --skill e2e-qa-tester --agent opencode -y
 
 # PRD Creator
 npx skills add AgustinAlbonico/ai-customizations --skill prd-creator --agent opencode -y
@@ -374,7 +304,6 @@ Despues de instalar, usa los comandos:
 ```text
 /bug "el carrito no actualiza el total"
 /task "agregar dark mode"
-/qa    # Prueba la ultima funcionalidad implementada
 /prd "necesito un sistema de notificaciones"  # Genera un PRD interactivo
 /agentmd                                      # Genera AGENTS.md jerarquico
 /project-starter "descripcion"                # Bootstrap de proyecto nuevo

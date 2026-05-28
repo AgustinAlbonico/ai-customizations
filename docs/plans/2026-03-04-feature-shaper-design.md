@@ -830,19 +830,7 @@ ai-customizations/
 ├── agents/
 ├── commands/
 │   ├── bug.md
-│   ├── qa.md
-│   ├── task.md
-│   └── tauri-migrate*.md
-├── hooks/
-├── scripts/
-├── skills/
-│   ├── e2e-qa-tester/
-│   ├── interactive-bug/
-│   │   └── SKILL.md
-│   ├── interactive-task/
-│   │   └── SKILL.md
-│   ├── sonarqube-quality-gate-playbook/
-│   └── tauri-react-nest-lan-migration/
+
 └── README.md
 ```
 

@@ -2,8 +2,8 @@
 name: project-onboarding
 description: >
   Onboarding automático de proyectos existentes. Escanea el stack tecnológico,
-  detecta componentes (backend, frontend, etc.), recomienda skills instalables con `npx skills add`,
-  las instala y las rutea a AGENTS.md automáticamente.
+  detecta componentes (backend, frontend, etc.), busca skills con `npx skills find`,
+  audita seguridad, pide aprobación, instala y rutea a AGENTS.md automáticamente.
   Trigger: "onboarding del proyecto", "setup del proyecto", "configurar skills",
   "instalar skills para este proyecto".
 license: MIT
@@ -16,7 +16,7 @@ metadata:
     - "Setup inicial de skills"
     - "Configurar skills del proyecto"
     - "Instalar skills recomendadas"
-allowed-tools: Read, Edit, Write, Glob, Grep, Bash, question
+allowed-tools: Read, Edit, Write, Glob, Grep, Bash, WebFetch, question
 ---
 
 # Protocolo project-onboarding
@@ -25,26 +25,27 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash, question
 
 Automatizar el setup de skills en proyectos existentes mediante:
 1. Detección automática del stack tecnológico
-2. Recomendación de skills relevantes desde catálogos compatibles con `npx skills add`
-3. Instalación y ruteo automático a AGENTS.md
+2. Discovery global de skills con `npx skills find`
+3. Auditoría de seguridad antes de instalar
+4. Instalación y ruteo automático a AGENTS.md después de aprobación humana
 
 ## Flujo general
 
 ```
-FASE 1: Escaneo del Proyecto
-    | detecta archivos de config, dependencias, estructura
+FASE 1: Escaneo y Detección de Stack
+    | detecta archivos, dependencias, componentes y scopes
     v
-FASE 2: Detección de Stack
-    | mapea tecnologías a componentes (backend, frontend, etc.)
+FASE 2: Discovery y Auditoría de Skills
+    | busca con npx skills find, deduplica, filtra y rankea
     v
-FASE 3: Recomendación de Skills
-    | sugiere skills según stack detectado
+FASE 3: Aprobación e Instalación
+    | muestra lista final, espera aprobación explícita e instala
     v
-FASE 4: Instalación
-    | instala skills seleccionadas con npx skills add
-    v
-FASE 5: Ruteo
+FASE 4: Ruteo
     | ejecuta skill-sync para actualizar AGENTS.md
+    v
+FASE 5: Post-instalación
+    | verifica instalación, metadata y AGENTS.md
 ```
 
 ---
@@ -57,6 +58,9 @@ FASE 5: Ruteo
 4. **Usar skill-sync local** — copiar de ai-customizations si no existe
 5. **Respetar estructura existente** — no reorganizar carpetas del proyecto
 6. **Mostrar progreso** — feedback visual en cada fase
+7. **NO instalar durante discovery** — `npx skills find` solo recopila candidatos
+8. **Bloquear skills peligrosas** — aplicar la política de seguridad antes de mostrar recomendadas
+9. **Aplicar el patrón de `find-skills`** — buscar, evaluar, presentar opciones e instalar solo tras aprobación
 
 ---
 
@@ -139,49 +143,134 @@ Si el usuario dice "no", preguntar qué falta o está mal y ajustar manualmente.
 
 ---
 
-## FASE 2 — Recomendación de Skills
+## FASE 2 — Discovery, Auditoría y Recomendación
 
-**Objetivo**: Sugerir skills relevantes desde catálogos compatibles con `npx skills add`.
+**Objetivo**: Buscar skills relevantes en el índice global de skills.sh usando `npx skills find`, no solo en repos conocidos.
 
-### Tabla de mapeo Stack → Skills
+### 1. Generar queries desde el stack detectado
 
-Ver [references/stack-mapping.md](references/stack-mapping.md) para la tabla completa.
+Usar el stack de FASE 1 para crear queries específicas por componente y combinadas.
 
-Ejemplos:
+Ejemplo para NestJS + React + Vite + Tailwind + TypeScript + MySQL:
 
-| Tecnología | Skills recomendadas |
-|------------|---------------------|
-| React | `vercel-react-best-practices`, `frontend-design` |
-| Next.js | `vercel-react-best-practices` |
-| NestJS | `nestjs-best-practices` |
-| Tailwind CSS | `tailwind-v4-shadcn`, `tailwind-css-patterns` |
-| Vite | `vite`, `vitest` |
-| TypeScript | `typescript-advanced-types` |
-| shadcn/ui | `shadcn` |
-| Django | `django-drf` |
-| PostgreSQL | `postgresql-expert-best-practices-code-review` |
+```text
+frontend:
+  - "react vite tailwind"
+  - "react typescript"
+  - "vite testing"
+
+backend:
+  - "nestjs backend"
+  - "typeorm mysql"
+  - "typescript testing"
+
+root:
+  - "agent workflows"
+  - "code review"
+  - "software architecture"
+```
+
+Ver [references/stack-mapping.md](references/stack-mapping.md) para semillas de queries por tecnología.
+
+### 2. Ejecutar discovery global
+
+Ejecutar `npx skills find` para cada query. Esto busca en skills.sh y puede devolver skills de cualquier source indexado, no solamente de repos hardcodeados.
+
+```bash
+npx skills find "react vite tailwind"
+npx skills find "nestjs backend"
+npx skills find "typescript testing"
+```
+
+Capturar resultados con este formato:
+
+```text
+<owner>/<repo>@<skill> <installs> installs
+```
+
+Si la salida contiene ANSI colors, ignorarlos visualmente o limpiarlos antes de parsear.
+
+PowerShell 5.1 puede limpiar ANSI así:
+
+```powershell
+$raw = npx skills find "nestjs backend"
+$clean = [regex]::Replace(($raw -join "`n"), "$([char]27)\[[0-9;]*m", "")
+$matches = [regex]::Matches($clean, "(?m)^([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)@([A-Za-z0-9_.-]+)\s+([0-9.]+[KkMm]?) installs")
+```
+
+### 3. Deduplicar y enriquecer candidatos
+
+Por cada candidato guardar:
+
+```json
+{
+  "id": "owner/repo@skill-name",
+  "source": "owner/repo",
+  "skill": "skill-name",
+  "installCommand": "npx skills add owner/repo --skill skill-name --agent opencode -y",
+  "matchedQuery": "react vite tailwind",
+  "component": "frontend",
+  "installs": 5000
+}
+```
+
+Deduplicar por `source + skill`. Si aparece en varias queries, acumular `matchedQueries` y subir relevancia.
+
+### 4. Auditoría de seguridad
+
+Antes de recomendar una skill, aplicar [references/security-filter.md](references/security-filter.md).
+
+Clasificar cada candidato como:
+
+| Estado | Qué significa | Acción |
+|--------|---------------|--------|
+| `SAFE` | No hay señales peligrosas y el source parece confiable | Puede recomendarse |
+| `REVIEW` | Hay dudas de calidad, baja adopción o source poco conocido | Mostrar separado, no preseleccionar |
+| `BLOCKED` | Contiene patrones peligrosos o instrucciones sospechosas | No instalar |
+
+### 5. Rankear
+
+Priorizar por:
+
+1. Match exacto con stack/componente
+2. Cantidad de queries donde apareció
+3. Installs
+4. Source confiable o conocido
+5. Ausencia de señales de riesgo
+
+No recomendar más de 10 skills por componente salvo que el usuario lo pida.
 
 ### Agrupación por componente
 
 ```
 Skills recomendadas para Backend:
-  [1] nestjs-best-practices
-  [2] typescript-advanced-types
+  [1] owner/repo@nestjs-best-practices
+      Motivo: match NestJS + backend
+      Riesgo: SAFE
+      Installs: 12K
 
 Skills recomendadas para Frontend:
-  [3] vercel-react-best-practices
-  [4] tailwind-v4-shadcn
-  [5] vite
-  [6] vitest
+  [2] secondsky/claude-skills@tailwind-v4-shadcn
+      Motivo: match React + Tailwind
+      Riesgo: SAFE
+      Installs: 5K
 
-Skills transversales (scope: root):
-  [7] docker-expert
+Skills para revisar manualmente:
+  [3] unknown/repo@react-helper
+      Motivo: baja adopción
+      Riesgo: REVIEW
+
+Skills bloqueadas:
+  [x] random/repo@dangerous-skill
+      Motivo: contiene `curl | sh`
+      Riesgo: BLOCKED
 
 ¿Cuáles instalás?
-  - Todas (1-7)
-  - Solo backend (1-2)
-  - Solo frontend (3-6)
+  - Todas las SAFE
+  - Solo backend
+  - Solo frontend
   - Selección personalizada (ej: 1,3,5)
+  - Ninguna
 ```
 
 ### Confirmación
@@ -190,17 +279,20 @@ Usar `question` tool:
 ```
 question: "¿Qué skills querés instalar?"
 options:
-  - "Todas las recomendadas"
+  - "Todas las SAFE"
   - "Solo backend"
   - "Solo frontend"
   - "Selección personalizada"
+  - "Ninguna"
 ```
+
+Si el usuario elige una skill `REVIEW`, pedir confirmación explícita mencionando el motivo de riesgo. Nunca instalar una `BLOCKED`.
 
 ---
 
-## FASE 3 — Instalación
+## FASE 3 — Aprobación e Instalación
 
-**Objetivo**: Instalar skills seleccionadas en `.agents/skills/`.
+**Objetivo**: Preparar skill-sync, validar que las skills aprobadas sigan disponibles e instalarlas solo después de aprobación humana.
 
 ### Pre-requisitos
 
@@ -211,7 +303,7 @@ options:
 
 ### Proceso de instalación
 
-Para cada skill seleccionada:
+Para cada skill aprobada por el usuario:
 
 ```bash
 npx skills add <owner/repo> --skill <skill-name> --agent opencode -y
@@ -225,11 +317,13 @@ Si la skill pertenece a este repositorio:
 npx skills add AgustinAlbonico/ai-customizations --skill <skill-name> --agent opencode -y
 ```
 
-Antes de instalar, validar que la skill exista en el source elegido:
+Antes de instalar, validar que el source siga resolviendo:
 
 ```bash
 npx skills add <owner/repo> --list
 ```
+
+Si falla la validación, remover esa skill del lote e informar al usuario antes de continuar.
 
 ### Asignación de scopes
 
@@ -312,6 +406,9 @@ AGENTS.md actualizados:
 ### Checklist
 
 - [ ] Todas las skills instaladas en `.agents/skills/`
+- [ ] Discovery ejecutado con `npx skills find` para queries por componente
+- [ ] Candidatos deduplicados y auditados antes de instalar
+- [ ] Usuario aprobó explícitamente la lista final
 - [ ] Metadata agregada a cada skill (scope + auto_invoke)
 - [ ] skill-sync ejecutado sin errores
 - [ ] AGENTS.md actualizados con tablas Auto-invoke
@@ -344,14 +441,14 @@ AGENTS.md actualizados:
 
 ```
 Usuario: "hacé onboarding del proyecto"
-Agente: escanea → detecta React + NestJS → recomienda 5 skills → instala → rutea
+Agente: escanea → detecta React + NestJS → busca con npx skills find → audita → pide aprobación → instala → rutea
 ```
 
 ### Caso 2: Proyecto existente sin skills
 
 ```
 Usuario: "configurá skills para este proyecto"
-Agente: escanea → detecta Django + PostgreSQL → recomienda 3 skills → instala → rutea
+Agente: escanea → detecta Django + PostgreSQL → busca skills globales → filtra riesgo → pide aprobación → instala → rutea
 ```
 
 ### Caso 3: Agregar skills a componente específico
@@ -379,5 +476,6 @@ project-starter → define stack + bootstrap → project-onboarding → instala 
 ## Recursos
 
 - **Tabla de mapeo**: Ver [references/stack-mapping.md](references/stack-mapping.md)
+- **Filtro de seguridad**: Ver [references/security-filter.md](references/security-filter.md)
 - **Script de detección**: Ver [assets/detect-stack.ps1](assets/detect-stack.ps1)
 - **Skill-sync**: Ver [../skill-sync/SKILL.md](../skill-sync/SKILL.md)

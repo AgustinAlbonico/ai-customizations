@@ -1,187 +1,162 @@
-# Tabla de Mapeo: Stack → Skills
+# Query Seeds: Stack -> Skills Discovery
 
-Este documento define qué skills se recomiendan según las tecnologías detectadas en el proyecto. Antes de instalar, validar que la skill exista en el source elegido con `npx skills add <owner/repo> --list`.
+Este documento ya no define una lista cerrada de skills. Define semillas de búsqueda para `npx skills find`, porque skills.sh indexa muchas fuentes distintas y una tabla hardcodeada se queda corta.
+
+## Regla General
+
+1. Detectar tecnologías reales del proyecto.
+2. Generar queries específicas por componente.
+3. Ejecutar `npx skills find "<query>"` para cada query.
+4. Deduplicar por `owner/repo@skill`.
+5. Aplicar `references/security-filter.md`.
+6. Mostrar el listado final al usuario y esperar aprobación.
 
 ## Frontend
 
-| Tecnología | Skills recomendadas | Scope |
-|------------|---------------------|-------|
-| React | `vercel-react-best-practices`, `frontend-design` | frontend |
-| Next.js | `vercel-react-best-practices` | frontend |
-| Vue | `vue-best-practices` | frontend |
-| Nuxt | `vue-best-practices` | frontend |
-| Angular | `angular-best-practices` | frontend |
-| Svelte | `svelte-best-practices` | frontend |
-| Vite | `vite`, `vitest` | frontend |
-| Tailwind CSS | `tailwind-v4-shadcn`, `tailwind-css-patterns` | frontend |
-| shadcn/ui | `shadcn` | frontend |
-| Radix UI | `shadcn` | frontend |
-| Material-UI | `mui-best-practices` | frontend |
-| Ant Design | `antd-best-practices` | frontend |
+| Tecnología | Queries sugeridas | Scope |
+|------------|-------------------|-------|
+| React | `react typescript`, `react components`, `react performance` | frontend |
+| Next.js | `nextjs best practices`, `next app router`, `next deployment` | frontend |
+| Vue | `vue best practices`, `vue typescript` | frontend |
+| Nuxt | `nuxt best practices`, `nuxt deployment` | frontend |
+| Angular | `angular best practices`, `angular testing` | frontend |
+| Svelte | `svelte best practices`, `sveltekit` | frontend |
+| Vite | `vite react`, `vite testing`, `vite build` | frontend |
+| Tailwind CSS | `tailwind v4`, `tailwind shadcn`, `tailwind design system` | frontend |
+| shadcn/ui | `shadcn`, `shadcn ui`, `component library` | frontend |
+| Radix UI | `radix ui`, `accessible components` | frontend |
+| Material-UI | `mui material ui`, `react material ui` | frontend |
+| Ant Design | `ant design react`, `antd` | frontend |
 
 ## Backend
 
-| Tecnología | Skills recomendadas | Scope |
-|------------|---------------------|-------|
-| NestJS | `nestjs-best-practices` | backend |
-| Express | `express-best-practices` | backend |
-| Fastify | `fastify-best-practices` | backend |
-| Django | `django-drf` | backend |
-| FastAPI | `fastapi-best-practices` | backend |
-| Flask | `flask-best-practices` | backend |
-| Gin (Go) | `go-best-practices` | backend |
-| Actix Web (Rust) | `rust-best-practices` | backend |
+| Tecnología | Queries sugeridas | Scope |
+|------------|-------------------|-------|
+| NestJS | `nestjs backend`, `nestjs best practices`, `nestjs testing` | backend |
+| Express | `express backend`, `express api`, `node api` | backend |
+| Fastify | `fastify backend`, `fastify api` | backend |
+| Django | `django rest`, `django best practices`, `django testing` | backend |
+| FastAPI | `fastapi`, `python api`, `fastapi testing` | backend |
+| Flask | `flask api`, `python flask` | backend |
+| Gin | `go gin`, `go backend`, `go api` | backend |
+| Actix Web | `rust actix`, `rust backend` | backend |
 
 ## Base de Datos
 
-| Tecnología | Skills recomendadas | Scope |
-|------------|---------------------|-------|
-| PostgreSQL | `postgresql-expert-best-practices-code-review` | backend |
-| MySQL | `mysql-best-practices` | backend |
-| MongoDB | `mongodb-best-practices` | backend |
-| TypeORM | `typeorm-best-practices` | backend |
-| Prisma | `prisma-best-practices` | backend |
-| Drizzle | `drizzle-best-practices` | backend |
-| Mongoose | `mongoose-best-practices` | backend |
+| Tecnología | Queries sugeridas | Scope |
+|------------|-------------------|-------|
+| PostgreSQL | `postgresql`, `postgres performance`, `database migrations` | backend |
+| MySQL | `mysql`, `mysql performance`, `database migrations` | backend |
+| MongoDB | `mongodb`, `mongodb schema`, `mongoose` | backend |
+| TypeORM | `typeorm`, `typeorm migrations`, `nestjs typeorm` | backend |
+| Prisma | `prisma`, `prisma migrations`, `database orm` | backend |
+| Drizzle | `drizzle orm`, `drizzle migrations` | backend |
+| Mongoose | `mongoose`, `mongodb mongoose` | backend |
 
 ## Testing
 
-| Tecnología | Skills recomendadas | Scope |
-|------------|---------------------|-------|
-| Vitest | `vitest` | frontend, backend |
-| Jest | `jest-best-practices` | frontend, backend |
-| Playwright | `playwright-e2e-testing` | root |
-| Cypress | `cypress-best-practices` | root |
-| pytest | `pytest` | backend |
+| Tecnología | Queries sugeridas | Scope |
+|------------|-------------------|-------|
+| Vitest | `vitest`, `vite testing`, `typescript testing` | frontend, backend |
+| Jest | `jest`, `javascript testing`, `nestjs testing` | frontend, backend |
+| Playwright | `playwright testing`, `e2e testing`, `webapp testing` | root |
+| Cypress | `cypress testing`, `e2e testing` | root |
+| pytest | `pytest`, `python testing` | backend |
 
 ## TypeScript
 
-| Tecnología | Skills recomendadas | Scope |
-|------------|---------------------|-------|
-| TypeScript | `typescript-advanced-types` | frontend, backend |
+| Tecnología | Queries sugeridas | Scope |
+|------------|-------------------|-------|
+| TypeScript | `typescript best practices`, `typescript types`, `typescript testing` | frontend, backend |
 
 ## DevOps / Infraestructura
 
-| Tecnología | Skills recomendadas | Scope |
-|------------|---------------------|-------|
-| Docker | `docker-expert` | root |
-| GitHub Actions | `github-actions-best-practices` | root |
-| GitLab CI | `gitlab-ci-best-practices` | root |
+| Tecnología | Queries sugeridas | Scope |
+|------------|-------------------|-------|
+| Docker | `docker`, `docker compose`, `containerization` | root |
+| GitHub Actions | `github actions`, `ci cd`, `deployment workflow` | root |
+| GitLab CI | `gitlab ci`, `ci cd` | root |
 
 ## Autenticación
 
-| Tecnología | Skills recomendadas | Scope |
-|------------|---------------------|-------|
-| Auth.js | `authjs-best-practices` | backend |
-| Clerk | `clerk-best-practices` | backend |
-| JWT (custom) | `jwt-security-best-practices` | backend |
+| Tecnología | Queries sugeridas | Scope |
+|------------|-------------------|-------|
+| Auth.js | `authjs`, `next auth`, `authentication` | backend |
+| Clerk | `clerk auth`, `authentication` | backend |
+| JWT | `jwt security`, `authentication security` | backend |
+| Better Auth | `better auth`, `authentication` | backend |
 
 ## State Management
 
-| Tecnología | Skills recomendadas | Scope |
-|------------|---------------------|-------|
-| Zustand | `zustand-best-practices` | frontend |
-| Redux | `redux-best-practices` | frontend |
-| TanStack Query | `tanstack-query-best-practices` | frontend |
+| Tecnología | Queries sugeridas | Scope |
+|------------|-------------------|-------|
+| Zustand | `zustand`, `react state management` | frontend |
+| Redux | `redux`, `redux toolkit`, `react state management` | frontend |
+| TanStack Query | `tanstack query`, `react query`, `server state` | frontend |
 
 ## Validación
 
-| Tecnología | Skills recomendadas | Scope |
-|------------|---------------------|-------|
-| Zod | `zod-best-practices` | frontend, backend |
-| Yup | `yup-best-practices` | frontend, backend |
+| Tecnología | Queries sugeridas | Scope |
+|------------|-------------------|-------|
+| Zod | `zod`, `typescript validation`, `schema validation` | frontend, backend |
+| Yup | `yup validation`, `schema validation` | frontend, backend |
 
 ## MCP (Model Context Protocol)
 
-| Tecnología | Skills recomendadas | Scope |
-|------------|---------------------|-------|
-| MCP Server | `mcp-server-best-practices` | mcp |
+| Tecnología | Queries sugeridas | Scope |
+|------------|-------------------|-------|
+| MCP Server | `mcp server`, `model context protocol`, `mcp builder` | mcp |
 
-## Transversales (siempre recomendadas)
+## Transversales
 
-Estas skills se recomiendan para cualquier proyecto:
+Estas queries pueden ejecutarse en cualquier proyecto:
 
-| Skill | Scope | Descripción |
-|-------|-------|-------------|
-| `sonarqube-quality-gate-playbook` | root | Mejora calidad de código |
+| Objetivo | Queries sugeridas | Scope |
+|----------|-------------------|-------|
+| Debugging | `debugging`, `systematic debugging`, `diagnose` | root |
+| Planning | `writing plans`, `brainstorming`, `product requirements` | root |
+| Code review | `code review`, `requesting code review`, `pull request review` | root |
+| Arquitectura | `software architecture`, `clean architecture`, `improve codebase architecture` | root |
+| Seguridad | `security review`, `secure coding`, `dependency audit` | root |
 
-| `interactive-bug` | root | Diagnóstico de bugs |
-| `interactive-task` | root | Clarificación de tareas |
+## Ranking
 
-## Lógica de recomendación
+Priorizar candidatos en este orden:
 
-### Por componente
+1. Match exacto con tecnología y componente.
+2. Aparece en varias queries relacionadas.
+3. Installs altos.
+4. Source oficial o reconocido.
+5. Auditoría local `SAFE`.
 
-1. **Backend**: Skills de framework + base de datos + testing backend
-2. **Frontend**: Skills de framework + UI + testing frontend
-3. **Shared**: Skills de TypeScript + validación
-4. **MCP**: Skills de MCP server
-5. **SDK**: Skills de testing + documentación
+## Límites
 
-### Prioridad
+- Máximo 10 skills `SAFE` por componente.
+- Las `REVIEW` se muestran separadas y no se preseleccionan.
+- Las `BLOCKED` se muestran con motivo, pero no se instalan.
 
-1. **Alta**: Framework principal (NestJS, React, Django, etc.)
-2. **Media**: Herramientas de build (Vite, Tailwind, etc.)
-3. **Baja**: Librerías auxiliares (Zustand, Zod, etc.)
+## Ejemplo: NestJS + React + Tailwind
 
-### Reglas
+```text
+Queries ejecutadas:
+  frontend:
+    - react typescript
+    - react components
+    - vite testing
+    - tailwind shadcn
 
-- **Máximo 10 skills por componente** para no sobrecargar
-- **Skills transversales** siempre van a scope `root`
-- **Si hay testing**, recomendar skill de testing específica
-- **Si hay TypeScript**, siempre recomendar `typescript-advanced-types`
+  backend:
+    - nestjs backend
+    - nestjs testing
+    - typeorm mysql
 
-## Ejemplos
+  root:
+    - code review
+    - systematic debugging
 
-### Proyecto NestJS + React + Tailwind
-
-```
-Backend:
-  - nestjs-best-practices
-  - typescript-advanced-types
-  - postgresql-expert-best-practices-code-review
-
-Frontend:
-  - vercel-react-best-practices
-  - frontend-design
-  - tailwind-v4-shadcn
-  - vite
-  - vitest
-  - typescript-advanced-types
-
-Root:
-  - docker-expert
-  - playwright-e2e-testing
-```
-
-### Proyecto Django + Vue
-
-```
-Backend:
-  - django-drf
-  - postgresql-expert-best-practices-code-review
-  - pytest
-
-Frontend:
-  - vue-best-practices
-  - vite
-  - vitest
-
-Root:
-  - docker-expert
-```
-
-### Proyecto Next.js fullstack
-
-```
-Frontend:
-  - vercel-react-best-practices
-  - frontend-design
-  - tailwind-v4-shadcn
-  - typescript-advanced-types
-  - vitest
-
-Root:
-  - docker-expert
-  - playwright-e2e-testing
+Resultado:
+  - Deduplicar owner/repo@skill
+  - Auditar seguridad
+  - Rankear
+  - Pedir aprobación antes de instalar
 ```

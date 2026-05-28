@@ -6,7 +6,6 @@ Infraestructura personal de IA: skills, agentes, hooks y comandos versionados en
 
 ```text
 skills/                     # skills instalables con npx skills (cross-agent)
-agents/                     # definiciones de agentes reutilizables
 commands/                   # comandos markdown reutilizables
 hooks/                      # hooks reutilizables
 scripts/                    # scripts de bootstrap/instalacion
@@ -143,7 +142,9 @@ La IA adapta la profundidad de preguntas segun la clasificacion: MVP (8-12 pregu
 
 **Que hace:**
 - Escanea un proyecto existente y detecta stack, componentes y scopes reales
-- Recomienda skills segun backend, frontend, shared, SDK o MCP
+- Busca skills en skills.sh con `npx skills find` segun backend, frontend, shared, SDK o MCP
+- Audita candidatos y bloquea señales peligrosas antes de instalar
+- Muestra una lista final y espera aprobacion humana
 - Instala skills localmente en `.agents/skills/` con `npx skills add`
 - Ejecuta `skill-sync` para mantener `AGENTS.md` actualizado
 

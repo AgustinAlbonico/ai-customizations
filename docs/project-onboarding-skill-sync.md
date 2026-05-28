@@ -6,9 +6,10 @@ Este flujo configura skills locales para un proyecto existente y mantiene sus `A
 
 1. Instala `project-onboarding` y `skill-sync` en el proyecto destino.
 2. Ejecuta onboarding para detectar stack, componentes y scopes reales.
-3. Confirma las skills recomendadas antes de instalar.
-4. Ejecuta `skill-sync` en dry-run y luego en modo escritura.
-5. Verifica que cada `AGENTS.md` tenga la tabla `### Auto-invoke Skills` correcta.
+3. Deja que `project-onboarding` busque skills con `npx skills find`, las audite y te muestre el listado final.
+4. Confirma las skills aprobadas antes de instalar.
+5. Ejecuta `skill-sync` en dry-run y luego en modo escritura.
+6. Verifica que cada `AGENTS.md` tenga la tabla `### Auto-invoke Skills` correcta.
 
 ## Install
 
@@ -27,8 +28,10 @@ La instalacion esperada es local al proyecto, en `.agents/skills/`. No uses inst
 |-------|--------|
 | Scan | Detecta `package.json`, `tsconfig.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, Docker y carpetas conocidas |
 | Stack | Genera componentes como `backend`, `frontend`, `shared`, `mcp`, `sdk` o `root` |
-| Recommend | Mapea tecnologias a skills sugeridas |
-| Install | Usa `npx skills add <owner/repo> --skill <skill-name> --agent opencode -y` |
+| Discovery | Ejecuta `npx skills find "<query>"` por tecnología y componente |
+| Audit | Deduplica candidatos y aplica `references/security-filter.md` |
+| Approval | Muestra `SAFE`, `REVIEW` y `BLOCKED`; espera aprobación humana |
+| Install | Usa `npx skills add <owner/repo> --skill <skill-name> --agent opencode -y` solo para aprobadas |
 | Route | Ejecuta `skill-sync` para actualizar `AGENTS.md` |
 
 ## Detection Scripts
@@ -67,6 +70,26 @@ Salida esperada:
 ## Skill Sync
 
 `skill-sync` lee la metadata de cada `SKILL.md` y genera tablas de routing en el `AGENTS.md` correspondiente.
+
+## Discovery Seguro
+
+`project-onboarding` no instala durante la búsqueda. Primero genera queries desde el stack detectado:
+
+```powershell
+npx skills find "react vite tailwind"
+npx skills find "nestjs backend"
+npx skills find "typescript testing"
+```
+
+Luego clasifica candidatos:
+
+| Estado | Acción |
+|--------|--------|
+| `SAFE` | Puede incluirse en la lista recomendada |
+| `REVIEW` | Se muestra separado y requiere selección explícita |
+| `BLOCKED` | No se instala; se muestra el motivo |
+
+La política completa vive en `.agents/skills/project-onboarding/references/security-filter.md`.
 
 Metadata requerida:
 
@@ -136,6 +159,9 @@ Para scopes propios, agrega `.agents/skill-scopes.json`:
 ## Verification Checklist
 
 - [ ] `detect-stack` devuelve JSON valido.
+- [ ] `npx skills find` devuelve candidatos para queries del stack.
+- [ ] Las skills candidatas fueron deduplicadas y auditadas antes de instalar.
+- [ ] El usuario aprobó explícitamente el listado final.
 - [ ] Las skills elegidas existen en el source antes de instalar.
 - [ ] `skill-sync` en dry-run muestra los `AGENTS.md` esperados.
 - [ ] `skill-sync` en modo escritura actualiza o crea solo los `AGENTS.md` esperados.

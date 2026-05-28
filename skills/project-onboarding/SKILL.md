@@ -2,7 +2,7 @@
 name: project-onboarding
 description: >
   Onboarding automático de proyectos existentes. Escanea el stack tecnológico,
-  detecta componentes (backend, frontend, etc.), recomienda skills de skills.sh,
+  detecta componentes (backend, frontend, etc.), recomienda skills instalables con `npx skills add`,
   las instala y las rutea a AGENTS.md automáticamente.
   Trigger: "onboarding del proyecto", "setup del proyecto", "configurar skills",
   "instalar skills para este proyecto".
@@ -25,7 +25,7 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash, question
 
 Automatizar el setup de skills en proyectos existentes mediante:
 1. Detección automática del stack tecnológico
-2. Recomendación de skills relevantes desde skills.sh
+2. Recomendación de skills relevantes desde catálogos compatibles con `npx skills add`
 3. Instalación y ruteo automático a AGENTS.md
 
 ## Flujo general
@@ -38,10 +38,10 @@ FASE 2: Detección de Stack
     | mapea tecnologías a componentes (backend, frontend, etc.)
     v
 FASE 3: Recomendación de Skills
-    | sugiere skills de skills.sh según stack detectado
+    | sugiere skills según stack detectado
     v
 FASE 4: Instalación
-    | instala skills seleccionadas con npx skills.sh install
+    | instala skills seleccionadas con npx skills add
     v
 FASE 5: Ruteo
     | ejecuta skill-sync para actualizar AGENTS.md
@@ -141,7 +141,7 @@ Si el usuario dice "no", preguntar qué falta o está mal y ajustar manualmente.
 
 ## FASE 2 — Recomendación de Skills
 
-**Objetivo**: Sugerir skills relevantes desde skills.sh.
+**Objetivo**: Sugerir skills relevantes desde catálogos compatibles con `npx skills add`.
 
 ### Tabla de mapeo Stack → Skills
 
@@ -200,7 +200,7 @@ options:
 
 ## FASE 3 — Instalación
 
-**Objetivo**: Instalar skills seleccionadas desde skills.sh.
+**Objetivo**: Instalar skills seleccionadas en `.agents/skills/`.
 
 ### Pre-requisitos
 
@@ -214,10 +214,22 @@ options:
 Para cada skill seleccionada:
 
 ```bash
-npx skills.sh install <skill-name>
+npx skills add <owner/repo> --skill <skill-name> --agent opencode -y
 ```
 
 Esto descarga la skill a `.agents/skills/<skill-name>/`.
+
+Si la skill pertenece a este repositorio:
+
+```bash
+npx skills add AgustinAlbonico/ai-customizations --skill <skill-name> --agent opencode -y
+```
+
+Antes de instalar, validar que la skill exista en el source elegido:
+
+```bash
+npx skills add <owner/repo> --list
+```
 
 ### Asignación de scopes
 
@@ -237,8 +249,8 @@ metadata:
 ### Ejemplo
 
 ```bash
-# Instalar skill
-npx skills.sh install nestjs-best-practices
+# Instalar skill desde un source compatible con npx skills
+npx skills add <owner/repo> --skill nestjs-best-practices --agent opencode -y
 
 # Agregar metadata (el agente edita el SKILL.md)
 metadata:

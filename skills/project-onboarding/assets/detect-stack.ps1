@@ -9,6 +9,12 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+if (-not (Test-Path -LiteralPath $ProjectPath)) {
+    throw "Project path does not exist: $ProjectPath"
+}
+
+$ProjectPath = (Resolve-Path -LiteralPath $ProjectPath).Path
+
 # Función para detectar tecnologías en un package.json
 function Get-NodeStack {
     param([string]$packageJsonPath)
@@ -68,6 +74,8 @@ function Get-NodeStack {
     if ($allDeps.ContainsKey("drizzle-orm")) { $stack += "Drizzle" }
     if ($allDeps.ContainsKey("mongoose")) { $stack += "Mongoose" }
     if ($allDeps.ContainsKey("sequelize")) { $stack += "Sequelize" }
+    if ($allDeps.ContainsKey("pg")) { $stack += "PostgreSQL" }
+    if ($allDeps.ContainsKey("mysql2")) { $stack += "MySQL" }
     
     # Testing
     if ($allDeps.ContainsKey("vitest")) { $stack += "Vitest" }

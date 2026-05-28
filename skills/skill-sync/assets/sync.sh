@@ -1,12 +1,33 @@
 #!/usr/bin/env bash
 # Sync skill metadata to AGENTS.md Auto-invoke sections
-# Usage: ./sync.sh [--dry-run] [--scope <scope>]
+# Usage: ./sync.sh [--dry-run] [--auto-add-metadata] [--scope <scope>] [--no-create-agents]
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(dirname "$(dirname "$(dirname "$SCRIPT_DIR")")")"
-SKILLS_DIR="$REPO_ROOT/skills"
+
+resolve_project_root() {
+    local current="$SCRIPT_DIR"
+    while [ "$current" != "/" ] && [ -n "$current" ]; do
+        if [ "$(basename "$current")" = ".agents" ]; then
+            dirname "$current"
+            return
+        fi
+        if [ -d "$current/.agents/skills" ] || [ -f "$current/AGENTS.md" ] || [ -d "$current/.git" ]; then
+            echo "$current"
+            return
+        fi
+        current="$(dirname "$current")"
+    done
+    pwd
+}
+
+REPO_ROOT="$(resolve_project_root)"
+if [ -d "$REPO_ROOT/.agents/skills" ]; then
+    SKILLS_DIR="$REPO_ROOT/.agents/skills"
+else
+    SKILLS_DIR="$REPO_ROOT/skills"
+fi
 
 # Colors
 RED='\033[0;31m'
@@ -17,6 +38,8 @@ NC='\033[0m'
 
 # Options
 DRY_RUN=false
+AUTO_ADD_METADATA=false
+CREATE_AGENTS=true
 FILTER_SCOPE=""
 
 # Parse arguments
@@ -26,16 +49,26 @@ while [[ $# -gt 0 ]]; do
             DRY_RUN=true
             shift
             ;;
+        --auto-add-metadata)
+            AUTO_ADD_METADATA=true
+            shift
+            ;;
+        --no-create-agents)
+            CREATE_AGENTS=false
+            shift
+            ;;
         --scope)
             FILTER_SCOPE="$2"
             shift 2
             ;;
         --help|-h)
-            echo "Usage: $0 [--dry-run] [--scope <scope>]"
+            echo "Usage: $0 [--dry-run] [--auto-add-metadata] [--scope <scope>] [--no-create-agents]"
             echo ""
             echo "Options:"
             echo "  --dry-run    Show what would change without modifying files"
-            echo "  --scope      Only sync specific scope (root, ui, api, sdk, mcp_server)"
+            echo "  --auto-add-metadata  Add default metadata to skills missing scope/auto_invoke"
+            echo "  --scope      Only sync specific scope (root, frontend, backend, shared, etc.)"
+            echo "  --no-create-agents   Warn instead of creating missing AGENTS.md files"
             exit 0
             ;;
         *)
@@ -50,12 +83,53 @@ get_agents_path() {
     local scope="$1"
     case "$scope" in
         root)       echo "$REPO_ROOT/AGENTS.md" ;;
-        ui)         echo "$REPO_ROOT/ui/AGENTS.md" ;;
-        api)        echo "$REPO_ROOT/api/AGENTS.md" ;;
-        sdk)        echo "$REPO_ROOT/prowler/AGENTS.md" ;;
-        mcp_server) echo "$REPO_ROOT/mcp_server/AGENTS.md" ;;
-        *)          echo "" ;;
+        frontend)
+            for p in frontend web client apps/frontend apps/web apps/client; do
+                [ -d "$REPO_ROOT/$p" ] && echo "$REPO_ROOT/$p/AGENTS.md" && return
+            done
+            echo "" ;;
+        backend)
+            for p in backend api server apps/backend apps/api apps/server; do
+                [ -d "$REPO_ROOT/$p" ] && echo "$REPO_ROOT/$p/AGENTS.md" && return
+            done
+            echo "" ;;
+        shared)
+            for p in packages/shared shared common packages/common; do
+                [ -d "$REPO_ROOT/$p" ] && echo "$REPO_ROOT/$p/AGENTS.md" && return
+            done
+            echo "" ;;
+        mcp|mcp_server)
+            for p in mcp_server mcp mcp-server; do
+                [ -d "$REPO_ROOT/$p" ] && echo "$REPO_ROOT/$p/AGENTS.md" && return
+            done
+            echo "" ;;
+        sdk)
+            for p in sdk lib packages/sdk packages/lib; do
+                [ -d "$REPO_ROOT/$p" ] && echo "$REPO_ROOT/$p/AGENTS.md" && return
+            done
+            echo "" ;;
+        *)
+            if [ -d "$REPO_ROOT/$scope" ]; then echo "$REPO_ROOT/$scope/AGENTS.md"; return; fi
+            local found
+            found=$(find "$REPO_ROOT" -maxdepth 3 -type d -name "$scope" \
+                ! -path '*/node_modules/*' ! -path '*/.git/*' ! -path '*/.agents/*' | head -n 1)
+            [ -n "$found" ] && echo "$found/AGENTS.md" || echo "" ;;
     esac
+}
+
+ensure_agents_file() {
+    local agents_path="$1"
+    local scope="$2"
+    [ -f "$agents_path" ] && return 0
+    if ! $CREATE_AGENTS; then return 1; fi
+    if $DRY_RUN; then
+        echo -e "${YELLOW}[DRY RUN] Would create $agents_path${NC}"
+        return 0
+    fi
+    mkdir -p "$(dirname "$agents_path")"
+    printf '# %s AGENTS.md\n\nProject-specific AI agent instructions for the `%s` scope.\n' "$scope" "$scope" > "$agents_path"
+    echo -e "${GREEN}  ✓ Created AGENTS.md for scope '$scope'${NC}"
+    return 0
 }
 
 # Extract YAML frontmatter field using awk
@@ -63,6 +137,7 @@ extract_field() {
     local file="$1"
     local field="$2"
     awk -v field="$field" '
+        { sub(/^\357\273\277/, ""); sub(/\r$/, "") }
         /^---$/ { in_frontmatter = !in_frontmatter; next }
         in_frontmatter && $1 == field":" {
             # Handle single line value
@@ -100,6 +175,8 @@ extract_metadata() {
     local field="$2"
 
     awk -v field="$field" '
+        { sub(/^\357\273\277/, ""); sub(/\r$/, "") }
+
         function trim(s) {
             sub(/^[[:space:]]+/, "", s)
             sub(/[[:space:]]+$/, "", s)
@@ -130,6 +207,7 @@ extract_metadata() {
             #   - "Action B"
             out = ""
             while (getline) {
+                sub(/\r$/, "")
                 # Stop when leaving metadata block
                 if (!in_frontmatter) break
                 if (!in_metadata) break
@@ -158,9 +236,71 @@ extract_metadata() {
     ' "$file"
 }
 
+add_missing_metadata() {
+    local file="$1"
+    local skill_name="$2"
+    local scope_raw auto_invoke_raw insert tmp
+    scope_raw=$(extract_metadata "$file" "scope")
+    auto_invoke_raw=$(extract_metadata "$file" "auto_invoke")
+    [ -n "$scope_raw" ] && [ -n "$auto_invoke_raw" ] && return 0
+
+    insert=""
+    if [ -z "$scope_raw" ]; then
+        insert="${insert}  scope: [root]\n"
+        echo -e "  ${BLUE}[AUTO] Added scope: [root]${NC}"
+    fi
+    if [ -z "$auto_invoke_raw" ]; then
+        insert="${insert}  auto_invoke:\n    - \"$skill_name\"\n"
+        echo -e "  ${BLUE}[AUTO] Added auto_invoke: \"$skill_name\"${NC}"
+    fi
+
+    if grep -q '^metadata:[[:space:]]*$' "$file"; then
+        tmp=$(mktemp)
+        awk -v insert="$insert" '
+            { sub(/^\357\273\277/, ""); sub(/\r$/, "") }
+            /^metadata:[[:space:]]*$/ && !done { print; printf "%s", insert; done=1; next }
+            { print }
+        ' "$file" > "$tmp"
+        mv "$tmp" "$file"
+    else
+        tmp=$(mktemp)
+        awk -v insert="$insert" '
+            { sub(/^\357\273\277/, ""); sub(/\r$/, "") }
+            /^---$/ && seen { print "metadata:"; printf "%s", insert; print; next }
+            /^---$/ { seen=1 }
+            { print }
+        ' "$file" > "$tmp"
+        mv "$tmp" "$file"
+    fi
+}
+
 echo -e "${BLUE}Skill Sync - Updating AGENTS.md Auto-invoke sections${NC}"
 echo "========================================================"
+echo "Project root: $REPO_ROOT"
+echo "Skills dir:   $SKILLS_DIR"
 echo ""
+
+# Auto-add metadata if requested
+if $AUTO_ADD_METADATA; then
+    echo -e "${BLUE}Phase 1: Auto-adding metadata to skills missing it${NC}"
+    while IFS= read -r skill_file; do
+        [ -f "$skill_file" ] || continue
+        skill_name=$(extract_field "$skill_file" "name")
+        [ -z "$skill_name" ] && skill_name=$(basename "$(dirname "$skill_file")")
+        scope_raw=$(extract_metadata "$skill_file" "scope")
+        auto_invoke_raw=$(extract_metadata "$skill_file" "auto_invoke")
+        if [ -z "$scope_raw" ] || [ -z "$auto_invoke_raw" ]; then
+            echo -e "${YELLOW}Skill: $skill_name${NC}"
+            if $DRY_RUN; then
+                [ -z "$scope_raw" ] && echo -e "  ${BLUE}[DRY] Would add scope: [root]${NC}"
+                [ -z "$auto_invoke_raw" ] && echo -e "  ${BLUE}[DRY] Would add auto_invoke: \"$skill_name\"${NC}"
+            else
+                add_missing_metadata "$skill_file" "$skill_name"
+            fi
+        fi
+    done < <(find "$SKILLS_DIR" -mindepth 2 -maxdepth 3 -name SKILL.md -print | sort)
+    echo ""
+fi
 
 # Collect skills by scope using temp files (Bash 3 compatible)
 SCOPE_TMPDIR=$(mktemp -d)
@@ -196,7 +336,7 @@ while IFS= read -r skill_file; do
         # Append to scope's skill file
         echo "$skill_name:$auto_invoke" >> "$SCOPE_TMPDIR/$scope"
     done
-done < <(find "$SKILLS_DIR" -mindepth 2 -maxdepth 2 -name SKILL.md -print | sort)
+done < <(find "$SKILLS_DIR" -mindepth 2 -maxdepth 3 -name SKILL.md -print | sort)
 
 # Generate Auto-invoke section for each scope
 # Deterministic scope order (stable diffs)
@@ -205,7 +345,7 @@ for scope_file in "$SCOPE_TMPDIR"/*; do
     scope=$(basename "$scope_file")
     agents_path=$(get_agents_path "$scope")
 
-    if [ -z "$agents_path" ] || [ ! -f "$agents_path" ]; then
+    if [ -z "$agents_path" ] || ! ensure_agents_file "$agents_path" "$scope"; then
         echo -e "${YELLOW}Warning: No AGENTS.md found for scope '$scope'${NC}"
         continue
     fi
@@ -242,7 +382,7 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
         [ -z "$action" ] && continue
         auto_invoke_section="$auto_invoke_section
 | $action | \`$skill_name\` |"
-    done < <(LC_ALL=C sort -t $'\t' -k1,1 -k2,2 "$rows_file")
+    done < <(LC_ALL=C sort -u -t $'\t' -k1,1 -k2,2 "$rows_file")
 
     rm -f "$rows_file"
 
@@ -274,21 +414,34 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
             mv "$agents_path.tmp" "$agents_path"
             echo -e "${GREEN}  ✓ Updated Auto-invoke section${NC}"
         else
-            # Insert after Skills Reference blockquote
-            awk '
+            # Prefer inserting after a Skills Reference blockquote, otherwise append.
+            awk -v section_file="$section_file" '
+                function print_section() {
+                    while ((getline line < section_file) > 0) print line
+                    close(section_file)
+                }
+
                 /^>.*SKILL\.md\)$/ && !inserted {
                     print
-                    getline
-                    if (/^$/) {
-                        print ""
-                        while ((getline line < "'"$section_file"'") > 0) print line
-                        close("'"$section_file"'")
-                        print ""
-                        inserted = 1
-                        next
+                    if ((getline next_line) > 0) {
+                        print next_line
+                        if (next_line ~ /^$/) {
+                            print_section()
+                            print ""
+                            inserted = 1
+                            next
+                        }
                     }
                 }
+
                 { print }
+
+                END {
+                    if (!inserted) {
+                        print ""
+                        print_section()
+                    }
+                }
             ' "$agents_path" > "$agents_path.tmp"
             mv "$agents_path.tmp" "$agents_path"
             echo -e "${GREEN}  ✓ Inserted Auto-invoke section${NC}"
@@ -316,7 +469,7 @@ while IFS= read -r skill_file; do
         echo -e "  ${YELLOW}$skill_name${NC} - missing: ${scope_raw:+}${scope_raw:-scope} ${auto_invoke:+}${auto_invoke:-auto_invoke}"
         missing=$((missing + 1))
     fi
-done < <(find "$SKILLS_DIR" -mindepth 2 -maxdepth 2 -name SKILL.md -print | sort)
+done < <(find "$SKILLS_DIR" -mindepth 2 -maxdepth 3 -name SKILL.md -print | sort)
 
 if [ $missing -eq 0 ]; then
     echo -e "  ${GREEN}All skills have sync metadata${NC}"

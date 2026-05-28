@@ -1,6 +1,6 @@
 # Tabla de Mapeo: Stack → Skills
 
-Este documento define qué skills de skills.sh se recomiendan según las tecnologías detectadas en el proyecto.
+Este documento define qué skills se recomiendan según las tecnologías detectadas en el proyecto. Antes de instalar, validar que la skill exista en el source elegido con `npx skills add <owner/repo> --list`.
 
 ## Frontend
 

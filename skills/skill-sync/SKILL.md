@@ -55,10 +55,24 @@ metadata:
 | Scope | Updates |
 |-------|---------|
 | `root` | `AGENTS.md` (repo root) |
-| `frontend` | `apps/frontend/AGENTS.md` |
-| `backend` | `apps/backend/AGENTS.md` |
+| `frontend` | First existing path among `frontend`, `web`, `client`, `apps/frontend`, `apps/web`, `apps/client` |
+| `backend` | First existing path among `backend`, `api`, `server`, `apps/backend`, `apps/api`, `apps/server` |
+| `shared` | First existing path among `packages/shared`, `shared`, `common`, `packages/common` |
+| `mcp` / `mcp_server` | First existing path among `mcp_server`, `mcp`, `mcp-server` |
+| `sdk` | First existing path among `sdk`, `lib`, `packages/sdk`, `packages/lib` |
 
-Scopes can be combined: `scope: [frontend, backend]`
+Scopes can be combined: `scope: [frontend, backend]`. Custom scopes are also supported when a matching directory exists or when `.agents/skill-scopes.json` defines it.
+
+Example custom scope file:
+
+```json
+{
+  "scopes": {
+    "admin": "apps/admin",
+    "mobile": "apps/mobile"
+  }
+}
+```
 
 ### Auto_invoke Format
 
@@ -79,22 +93,29 @@ auto_invoke:
 ### Windows
 
 ```powershell
-.\skills\skill-sync\assets\sync.ps1
-.\skills\skill-sync\assets\sync.ps1 -DryRun
-.\skills\skill-sync\assets\sync.ps1 -Scope root
+.\.agents\skills\skill-sync\assets\sync.ps1
+.\.agents\skills\skill-sync\assets\sync.ps1 -DryRun
+.\.agents\skills\skill-sync\assets\sync.ps1 -AutoAddMetadata
+.\.agents\skills\skill-sync\assets\sync.ps1 -Scope root
+.\.agents\skills\skill-sync\assets\sync.ps1 -ProjectRoot C:\ruta\proyecto
 ```
+
+If the repo stores skills at `skills/` instead of `.agents/skills/`, run the equivalent `skills/skill-sync/assets/sync.ps1` path.
 
 ### macOS / Linux
 
 ```bash
-./skills/skill-sync/assets/sync.sh
-./skills/skill-sync/assets/sync.sh --dry-run
-./skills/skill-sync/assets/sync.sh --scope root
+./.agents/skills/skill-sync/assets/sync.sh
+./.agents/skills/skill-sync/assets/sync.sh --dry-run
+./.agents/skills/skill-sync/assets/sync.sh --auto-add-metadata
+./.agents/skills/skill-sync/assets/sync.sh --scope root
 ```
+
+If the repo stores skills at `skills/` instead of `.agents/skills/`, run the equivalent `skills/skill-sync/assets/sync.sh` path.
 
 ## What it does
 
-1. Scans all `skills/*/SKILL.md`
+1. Scans all `.agents/skills/*/SKILL.md` or `skills/*/SKILL.md`
 2. Extracts `metadata.scope` and `metadata.auto_invoke` from each
 3. Groups skills by scope
 4. Generates the `### Auto-invoke Skills` table for each AGENTS.md
@@ -116,7 +137,7 @@ AGENTS.md auto-invoke table updates automatically
 
 - [ ] Added `metadata.scope` to skill
 - [ ] Added `metadata.auto_invoke` with action description
-- [ ] Ran `sync.ps1` or `sync.sh`
+- [ ] Ran `sync.ps1` or `sync.sh` with `-DryRun` / `--dry-run` first
 - [ ] Verified AGENTS.md updated correctly
 
 ## File Structure

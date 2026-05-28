@@ -139,6 +139,29 @@ La IA adapta la profundidad de preguntas segun la clasificacion: MVP (8-12 pregu
 
 ---
 
+### `project-onboarding` - Skills para proyectos existentes
+
+**Que hace:**
+- Escanea un proyecto existente y detecta stack, componentes y scopes reales
+- Recomienda skills segun backend, frontend, shared, SDK o MCP
+- Instala skills localmente en `.agents/skills/` con `npx skills add`
+- Ejecuta `skill-sync` para mantener `AGENTS.md` actualizado
+
+**Cuando usarlo:**
+- Ya tenes un proyecto empezado y queres configurarlo para trabajar con IA
+- Necesitas un setup reusable para repos con estructuras distintas
+- Queres evitar mantener tablas de skills a mano
+
+**Como usarlo:**
+```text
+"hace onboarding del proyecto"
+"configura skills para este repo"
+```
+
+Manual completo: [`docs/project-onboarding-skill-sync.md`](docs/project-onboarding-skill-sync.md)
+
+---
+
 ### `tauri-react-nest-lan-migration` - Migracion Tauri
 
 **Que hace:**
@@ -265,8 +288,10 @@ metadata:
 | Scope | Actualiza |
 |-------|-----------|
 | `root` | `AGENTS.md` (raiz del repo) |
-| `frontend` | `apps/frontend/AGENTS.md` |
-| `backend` | `apps/backend/AGENTS.md` |
+| `frontend` | `frontend`, `web`, `client`, `apps/frontend`, `apps/web`, `apps/client` |
+| `backend` | `backend`, `api`, `server`, `apps/backend`, `apps/api`, `apps/server` |
+| `shared` | `packages/shared`, `shared`, `common`, `packages/common` |
+| custom | Directorio definido en `.agents/skill-scopes.json` |
 
 **Instalacion:**
 ```powershell
@@ -314,6 +339,9 @@ npx skills add AgustinAlbonico/ai-customizations --skill project-starter --agent
 
 # Skill Sync
 npx skills add AgustinAlbonico/ai-customizations --skill skill-sync --agent opencode -y
+
+# Project Onboarding
+npx skills add AgustinAlbonico/ai-customizations --skill project-onboarding --agent opencode -y
 ```
 
 ### Opcion 2: Instalar todas las skills

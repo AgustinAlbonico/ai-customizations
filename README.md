@@ -220,6 +220,61 @@ Alias corto de `e2e-qa-tester`. Ejecuta el mismo flujo con menos typing.
 
 ---
 
+### `skill-sync` - Auto-sync de AGENTS.md
+
+**Que hace:**
+- Mantiene las tablas de Skill Routing en AGENTS.md actualizadas automaticamente
+- Lee todos los `SKILL.md` y extrae `metadata.scope` + `metadata.auto_invoke`
+- Genera las secciones `### Auto-invoke Skills` sin intervencion manual
+- Inspirado en el sistema de Prowler Cloud
+
+**Cuando usarlo:**
+- Agreaste un skill nuevo y queres que aparezca en AGENTS.md
+- Modificaste el `metadata.auto_invoke` de un skill
+- Queres regenerar todas las tablas de routing
+
+**Como usarlo:**
+```powershell
+# Windows
+.\skills\skill-sync\assets\sync.ps1
+
+# macOS/Linux
+./skills/skill-sync/assets/sync.sh
+
+# Preview sin modificar
+.\skills\skill-sync\assets\sync.ps1 -DryRun
+```
+
+**Como funciona:**
+
+1. Cada skill tiene metadata en su `SKILL.md`:
+```yaml
+metadata:
+  scope: [root]
+  auto_invoke:
+    - "Creating API endpoints"
+    - "Adding database queries"
+```
+
+2. El script escanea todos los skills y genera las tablas automaticamente
+
+3. Se crea/actualiza la seccion `### Auto-invoke Skills` en los AGENTS.md correspondientes
+
+**Scopes disponibles:**
+
+| Scope | Actualiza |
+|-------|-----------|
+| `root` | `AGENTS.md` (raiz del repo) |
+| `frontend` | `apps/frontend/AGENTS.md` |
+| `backend` | `apps/backend/AGENTS.md` |
+
+**Instalacion:**
+```powershell
+npx skills add AgustinAlbonico/ai-customizations --skill skill-sync --agent opencode -y
+```
+
+---
+
 ### `tauri-migration` - Alias para Migracion Tauri
 
 Alias corto de `tauri-react-nest-lan-migration`. Ejecuta el mismo flujo de migracion Web -> Desktop.
@@ -256,6 +311,9 @@ npx skills add AgustinAlbonico/ai-customizations --skill agentmd-generator --age
 
 # Project Starter
 npx skills add AgustinAlbonico/ai-customizations --skill project-starter --agent opencode -y
+
+# Skill Sync
+npx skills add AgustinAlbonico/ai-customizations --skill skill-sync --agent opencode -y
 ```
 
 ### Opcion 2: Instalar todas las skills

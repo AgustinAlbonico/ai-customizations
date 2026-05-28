@@ -195,7 +195,22 @@ PowerShell 5.1 puede limpiar ANSI así:
 ```powershell
 $raw = npx skills find "nestjs backend"
 $clean = [regex]::Replace(($raw -join "`n"), "$([char]27)\[[0-9;]*m", "")
-$matches = [regex]::Matches($clean, "(?m)^([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)@([A-Za-z0-9_.-]+)\s+([0-9.]+[KkMm]?) installs")
+$lines = $clean -split "`r?`n"
+
+for ($i = 0; $i -lt $lines.Count; $i++) {
+  if ($lines[$i] -match "^([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)@([A-Za-z0-9_.-]+)\s+([0-9.]+[KkMm]?) installs") {
+    $source = $Matches[1]
+    $skill = $Matches[2]
+    $installs = $Matches[3]
+    $url = ""
+
+    if (($i + 1) -lt $lines.Count -and $lines[$i + 1] -match "https://skills\.sh/[^\s]+") {
+      $url = $Matches[0]
+    }
+
+    "$source@$skill | $installs installs | $url"
+  }
+}
 ```
 
 ### 3. Deduplicar y enriquecer candidatos

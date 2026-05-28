@@ -21,6 +21,8 @@ Prefer candidates with at least one strong signal:
 
 Low installs are not automatically unsafe, but they move the candidate to `REVIEW` unless the source is allowlisted.
 
+An unknown source is not automatically unsafe. A candidate can be `SAFE` when its available `SKILL.md` and supporting files were reviewed, no blocking patterns were found, and it has at least one strong trust signal such as high installs or an exact stack match.
+
 ## Blocking Patterns
 
 Block any skill whose `SKILL.md` or supporting files instruct the agent to run or embed:
@@ -45,6 +47,16 @@ Mark as `REVIEW` when:
 - The skill includes shell commands that write outside the project directory.
 - The source appears to be a fork or duplicate of a better-known skill.
 - The skill is unrelated to the detected stack but appeared due to broad search terms.
+- The skill could not be inspected because the source page, `SKILL.md`, or network request failed.
+
+## Timeout Handling
+
+If `npx skills find "<query>"` times out:
+
+1. Retry once with a narrower query.
+2. If it still fails, record the query as timed out.
+3. Continue with other queries.
+4. Do not install or recommend results from a timed-out query.
 
 ## Recommended Review Steps
 

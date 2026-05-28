@@ -182,6 +182,8 @@ npx skills find "nestjs backend"
 npx skills find "typescript testing"
 ```
 
+Si una query tarda demasiado o falla, reintentar una vez con una query más específica. Si vuelve a fallar, registrar el timeout y continuar con las demás queries; no bloquear todo el onboarding por una sola búsqueda.
+
 Capturar resultados con este formato:
 
 ```text
@@ -239,7 +241,7 @@ Clasificar cada candidato como:
 
 | Estado | Qué significa | Acción |
 |--------|---------------|--------|
-| `SAFE` | No hay señales peligrosas y el source parece confiable | Puede recomendarse |
+| `SAFE` | Se revisó el contenido disponible, no hay señales peligrosas y tiene al menos una señal fuerte de confianza | Puede recomendarse |
 | `REVIEW` | Hay dudas de calidad, baja adopción o source poco conocido | Mostrar separado, no preseleccionar |
 | `BLOCKED` | Contiene patrones peligrosos o instrucciones sospechosas | No instalar |
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env pwsh
 # skill-sync: Sync skill metadata to AGENTS.md Auto-invoke sections
-# Usage: ./sync.ps1 [-DryRun] [-Scope <scope>]
+# Usage: ./sync.ps1 [-DryRun] [-AutoAddMetadata] [-Scope <scope>]
 # Works on Windows, macOS, Linux (PowerShell cross-platform)
 #
 # Features:
@@ -10,22 +10,22 @@
 
 param(
     [switch]$DryRun,
-    [switch]$AutoAddMetadata,  # Auto-add metadata to skills missing it
+    [switch]$AutoAddMetadata,
     [string]$Scope = ""
 )
 
 $ErrorActionPreference = "Stop"
 
 $SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
-$REPO_ROOT = Split-Path (Split-Path (Split-Path $SCRIPT_DIR -Parent) -Parent)
-$SKILLS_DIR = Join-Path $REPO_ROOT "skills"
+$REPO_ROOT = Split-Path (Split-Path $SCRIPT_DIR -Parent) -Parent
+$SKILLS_DIR = Join-Path (Join-Path $REPO_ROOT ".agents") "skills"
 
 function Get-AgentsPath {
     param([string]$scope)
     switch ($scope) {
         "root"     { return Join-Path $REPO_ROOT "AGENTS.md" }
-        "frontend" { return Join-Path $REPO_ROOT "apps\frontend\AGENTS.md" }
-        "backend"  { return Join-Path $REPO_ROOT "apps\backend\AGENTS.md" }
+        "frontend" { return Join-Path (Join-Path (Join-Path $REPO_ROOT "apps") "frontend") "AGENTS.md" }
+        "backend"  { return Join-Path (Join-Path (Join-Path $REPO_ROOT "apps") "backend") "AGENTS.md" }
         default    { return "" }
     }
 }
@@ -34,7 +34,7 @@ function Extract-Field {
     param([string]$file, [string]$field)
     $content = Get-Content $file -Raw
     if ($content -match "(?s)^---\r?\n(.*?)\r?\n---") {
-        $frontmatter = $matches[1]
+        $frontmatter = Normalize-Frontmatter $matches[1]
         $pattern = "(?m)^$field`:(\s*)(.*)$"
         if ($frontmatter -match $pattern) {
             $value = $matches[2].Trim()
@@ -49,7 +49,7 @@ function Extract-Metadata {
     $content = Get-Content $file -Raw
 
     if ($content -notmatch '(?s)^---\r?\n(.*?)\r?\n---') { return "" }
-    $frontmatter = $matches[1]
+    $frontmatter = Normalize-Frontmatter $matches[1]
 
     if ($frontmatter -notmatch '(?s)(?:^|\n)metadata:\s*\n((?:[ ]{1,4}.+\n)*)') {
         $pattern = "(?m)^metadata:\s*\n\s{0,4}(.*?)(?:\n[^\s]|$)"
@@ -57,26 +57,68 @@ function Extract-Metadata {
             $metaBlock = $matches[1]
             return Extract-MetadataFromBlock $metaBlock $field
         }
-        return ""
+        return Extract-MetadataFromBlock $frontmatter $field
     }
 
     $metaBlock = $matches[1]
     return Extract-MetadataFromBlock $metaBlock $field
 }
 
+function Normalize-Frontmatter {
+    param([string]$frontmatter)
+    
+    $lines = @()
+    foreach ($line in ($frontmatter -split '\r?\n')) {
+        # Detectar líneas con múltiples fields (ej: "version: "1.1"  scope: [root]")
+        if ($line -match '^(\s*)([a-z_]+):\s*(.+?)\s{2,}([a-z_]+):\s*(.+)$') {
+            $indent = $matches[1]
+            $field1 = $matches[2]
+            $value1 = $matches[3]
+            $field2 = $matches[4]
+            $value2 = $matches[5]
+            $lines += "$indent${field1}: $value1"
+            $lines += "$indent${field2}: $value2"
+        }
+        # Detectar líneas de lista con field extra (ej: '- "value"  scope: [root]')
+        elseif ($line -match '^(\s*-\s+.+?)\s{2,}([a-z_]+):\s*(.+)$') {
+            $listPart = $matches[1]
+            $field2 = $matches[2]
+            $value2 = $matches[3]
+            $lines += $listPart
+            $lines += "  ${field2}: $value2"
+        }
+        else {
+            $lines += $line
+        }
+    }
+    return ($lines -join "`n")
+}
+
 function Extract-MetadataFromBlock {
     param([string]$block, [string]$field)
 
-    $pattern = "(?m)^$field`:\s*\n"
+    # Normalizar el block primero
+    $block = Normalize-Frontmatter $block
+
+    # Intentar matchear field con valor en la misma línea (ej: "scope: [root]")
+    $inlinePattern = "(?m)^\s*$field`:\s*(.+)$"
+    if ($block -match $inlinePattern) {
+        $value = $matches[1].Trim()
+        # Si el valor empieza con "-", es una lista, no un valor inline
+        if ($value -notmatch '^-') {
+            $value = $value.Trim('"', "'")
+            # Quitar corchetes de arrays YAML (ej: "[root]" -> "root")
+            $value = $value -replace '^\[(.*)\]$', '$1'
+            # Si el valor no es ">" y no está vacío, retornarlo
+            if ($value -ne ">" -and $value.Length -gt 0) { return $value }
+        }
+    }
+
+    # Intentar matchear field seguido de newline (para listas)
+    $pattern = "(?m)^\s*$field`:\s*\r?\n"
     if ($block -notmatch $pattern) { return "" }
 
     $afterMatch = $block.Substring($block.IndexOf($matches[0]) + $matches[0].Length)
-
-    if ($afterMatch -match '^[^\n]+' -and $matches[0] -notmatch '^\s+[-*]') {
-        $value = $matches[0].Trim()
-        $value = $value.Trim('"', "'")
-        if ($value -ne ">" -and $value.Length -gt 0) { return $value }
-    }
 
     $lines = @()
     foreach ($line in ($afterMatch -split '\r?\n')) {
@@ -99,17 +141,15 @@ function Add-MissingMetadata {
 
     $content = Get-Content $skillFile -Raw
 
-    # Check if metadata block exists
-    $hasMetadata = $content -match '(?s)^---\r?\n.*?\n---'
+    $hasFrontmatter = $content -match '(?s)^---\r?\n(.*?)\r?\n---'
 
     $frontmatter = ""
     $body = ""
 
     if ($content -match '(?s)^(---\r?\n)(.*?)(\r?\n---)(.*)') {
-        $frontmatter = $matches[2]
+        $frontmatter = Normalize-Frontmatter $matches[2]
         $body = $matches[4]
     } else {
-        # No frontmatter at all - create it
         $body = $content
         $frontmatter = ""
     }
@@ -118,52 +158,34 @@ function Add-MissingMetadata {
     $needsAutoInvoke = $frontmatter -notmatch '(?m)^auto_invoke`:'
 
     if (-not $needsScope -and -not $needsAutoInvoke) {
-        return $false  # Nothing to add
+        return $false
     }
 
     $newLines = @()
-    $added = $false
-
-    # Parse existing metadata lines
-    $metaLines = @()
-    $inMetadata = $false
-    $metaIndent = ""
-
-    if ($frontmatter -match '(?m)^metadata:') {
-        $inMetadata = $true
-        # Find indent level
-        $metaStart = $frontmatter -match '(?m)^(metadata):'
-        $metaIndent = if ($matches[1] -match '^(\s*)') { $matches[1] } else { "" }
-    }
 
     if ($needsScope) {
         $newLines += "  scope: [root]"
-        $added = $true
         Write-Host "  [AUTO] Added scope: [root]" -Foreground Cyan
     }
 
     if ($needsAutoInvoke) {
         $newLines += "  auto_invoke:"
         $newLines += "    - ""$skillName"""
-        $added = $true
         Write-Host "  [AUTO] Added auto_invoke: ""$skillName""" -Foreground Cyan
     }
 
-    if ($added) {
-        if ($inMetadata) {
-            # Insert new lines after "metadata:" line
-            $frontmatter = $frontmatter -replace '(?m)^(metadata:\s*)$', "`$1`n" + ($newLines -join "`n")
+    if ($newLines.Count -gt 0) {
+        if ($hasFrontmatter) {
+            $frontmatter = $frontmatter + ($newLines -join "`n") + "`n"
+            $newContent = "---`n" + $frontmatter + "---`n" + $body
         } else {
-            # Add metadata block after first ---
-            $metaBlock = "`nmetadata:`n" + ($newLines -join "`n") + "`n"
-            $frontmatter = $frontmatter + $metaBlock
+            $metaBlock = "`n---`nmetadata:`n" + ($newLines -join "`n") + "`n---`n" + $body
+            $newContent = "---`n" + $frontmatter + $metaBlock
         }
-
-        $newContent = "---`n" + $frontmatter + "---`n" + $body
         Set-Content -Path $skillFile -Value $newContent -NoNewline
     }
 
-    return $added
+    return $true
 }
 
 Write-Host "Skill Sync - Updating AGENTS.md Auto-invoke sections"
@@ -176,7 +198,6 @@ $skillFiles = Get-ChildItem -Path $SKILLS_DIR -Recurse -Filter "SKILL.md" -Depth
 
 $scopeTable = @{}
 
-# Phase 1: Auto-add metadata if requested
 if ($AutoAddMetadata) {
     Write-Host "Phase 1: Auto-adding metadata to skills missing it"
     Write-Host "----------------------------------------------------"
@@ -207,7 +228,6 @@ if ($AutoAddMetadata) {
     Write-Host ""
 }
 
-# Phase 2: Build scope table from metadata
 Write-Host "Phase 2: Building routing tables from metadata"
 Write-Host "----------------------------------------------"
 
@@ -237,7 +257,6 @@ foreach ($skillFile in $skillFiles | Sort-Object FullName) {
     }
 }
 
-# Phase 3: Update AGENTS.md files
 Write-Host ""
 Write-Host "Phase 3: Updating AGENTS.md files"
 Write-Host "------------------------------------"
@@ -291,7 +310,6 @@ foreach ($scope in $scopeTable.Keys | Sort-Object) {
 Write-Host ""
 Write-Host "Done!" -Foreground Green
 
-# Summary
 Write-Host ""
 Write-Host "========================================"
 Write-Host "Summary"
@@ -304,7 +322,10 @@ foreach ($skillFile in $skillFiles | Sort-Object FullName) {
     $autoInvokeRaw = Extract-Metadata $skillFile.FullName "auto_invoke"
 
     if ([string]::IsNullOrEmpty($scopeRaw) -or [string]::IsNullOrEmpty($autoInvokeRaw)) {
-        Write-Host "$skillName - missing: $(if([string]::IsNullOrEmpty($scopeRaw)){'scope'}{if([string]::IsNullOrEmpty($scopeRaw) -and [string]::IsNullOrEmpty($autoInvokeRaw)){' '}$(if([string]::IsNullOrEmpty($autoInvokeRaw)){'auto_invoke'})" -Foreground Yellow
+        $missingParts = @()
+        if ([string]::IsNullOrEmpty($scopeRaw)) { $missingParts += "scope" }
+        if ([string]::IsNullOrEmpty($autoInvokeRaw)) { $missingParts += "auto_invoke" }
+        Write-Host "$skillName - missing: $($missingParts -join ' ')" -Foreground Yellow
         $missing++
     }
 }

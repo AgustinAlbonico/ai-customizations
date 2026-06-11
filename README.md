@@ -191,6 +191,25 @@ Playbook iterativo para llevar proyectos Node y TypeScript (NestJS + React en mo
 
 ---
 
+### `playwright-spec-verifier` - Verificacion visual de specs
+
+**Que hace:**
+- Lee un spec funcional y lo prueba con Playwright MCP contra el frontend.
+- Verifica flujo feliz, alternativos, network requests, consola y snapshots.
+- Documenta automaticamente errores en `iteracion 1/errores/<spec>.md`.
+
+**Cuando usarlo:**
+- Queres probar un archivo de iteracion contra el sistema real.
+- Necesitas comparar spec vs comportamiento visible sin revisar codigo.
+- Queres dejar un reporte reusable de errores funcionales y UI/UX.
+
+**Como usarlo:**
+```text
+/verificar-spec 01-registrar-nutricionista.md
+```
+
+---
+
 ### `skill-sync` - Auto-sync de AGENTS.md
 
 **Que hace:**
@@ -273,6 +292,9 @@ npx skills add AgustinAlbonico/ai-customizations --skill skill-sync --agent open
 
 # Project Onboarding
 npx skills add AgustinAlbonico/ai-customizations --skill project-onboarding --agent opencode -y
+
+# Playwright Spec Verifier
+npx skills add AgustinAlbonico/ai-customizations --skill playwright-spec-verifier --agent opencode -y
 ```
 
 ### Opcion 2: Instalar todas las skills
@@ -308,6 +330,7 @@ Despues de instalar, usa los comandos:
 /prd "necesito un sistema de notificaciones"  # Genera un PRD interactivo
 /agentmd                                      # Genera AGENTS.md jerarquico
 /project-starter "descripcion"                # Bootstrap de proyecto nuevo
+/verificar-spec 01-registrar-nutricionista.md # Prueba un spec y documenta errores
 ```
 
 La IA va a hacerte preguntas interactivas con opciones multiple choice o abiertas según lo que necesite saber.

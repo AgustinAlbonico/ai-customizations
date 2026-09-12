@@ -40,6 +40,14 @@ El orquestador puede reabrir esta fase más adelante (`review research` + cambia
 Alcance según nivel: mvp → 2-3 competidores + 1 pasada de reviews; production → 4-6 + 2.
 Los exploradores corren en paralelo; la síntesis corre sola después, leyendo todas las notes.
 
+## Proceso
+
+1. Confirmar skip o alcance (según research_mode y nivel).
+2. Ronda de interacción (arriba).
+3. Lanzar exploradores en paralelo → esperar handoffs.
+4. Lanzar síntesis con las notes completas.
+5. Validar contra exit criteria antes de cerrar.
+
 ## Reglas
 
 1. Cada explorador escribe su nota completa a archivo y devuelve solo el handoff.

@@ -41,6 +41,13 @@ Ronda 2 — validación de redacción derivada:
 - El orquestador revisa el draft contra las exit criteria ANTES de entrevistar, para que las
   preguntas salgan de gaps reales.
 
+## Proceso
+
+1. Delegar draft inicial al requirements-drafter.
+2. Revisar el draft contra las exit criteria ANTES de entrevistar (preguntas = gaps reales).
+3. Rondas de interacción sobre prioridades y redacción.
+4. Refinar el documento y re-validar.
+
 ## Formato de IDs (estables, nunca renumerar)
 
 ```text

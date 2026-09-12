@@ -44,6 +44,12 @@ coherentes y confirmar.
 - [../agents/ux-reference-scan.md](../agents/ux-reference-scan.md): si el usuario no tiene
   referencias, un explorador web levanta 3-5 apps de referencia del tipo de producto.
 
+## Proceso
+
+1. Rondas de interacción (arriba); delegar ux-reference-scan si hace falta.
+2. Escribir UX-UI.md por el template con defaults confirmados.
+3. Validar: info architecture cubre las áreas del UC map.
+
 ## Template de UX-UI.md
 
 ```markdown

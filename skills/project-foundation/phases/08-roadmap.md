@@ -20,6 +20,11 @@ cada feature con ID, propósito y trazabilidad completa.
 - `docs/architecture/SYSTEM-DESIGN.md` (solo para leer dependencias técnicas entre
   componentes — NO para agregar decisiones)
 
+## Prohibido
+
+- `docs/research/*` (el mercado no ordena entregas) y `docs/product/UX-UI.md`.
+- Agregar decisiones técnicas nuevas vía el roadmap: si falta algo, es un gap para `review system_design`, no para acá.
+
 ## Interacción (1 ronda de máx 3-4)
 
 - Presentar la propuesta de fases de entrega (p. ej. Fase 1 MVP: X, Y; Fase 2: Z) y pedir
@@ -38,21 +43,26 @@ cada feature con ID, propósito y trazabilidad completa.
 
 ## Template de ROADMAP.md
 
+Estructura jerárquica `Phase → Epic → Feature`. Los épicos agrupan features relacionadas
+dentro de una fase; en fases chicas pueden quedar con UN solo épico. No inventar épicos vacíos.
+
 ```markdown
 # Roadmap — <producto>
 
 ## Phase 1 — MVP (o nombre de la fase)
-### FEAT-001 — <Nombre>
+### Epic: <nombre> (agrupador de valor de negocio)
+#### FEAT-001 — <Nombre>
 - Propósito: 1-2 líneas de valor de negocio
 - Requirements: FR-APP-001, FR-APP-002
 - Use cases: UC-APP-001
 - Depends on: —
 - Status: planned
 
-### FEAT-002 — ...
+#### FEAT-002 — ...
 
 ## Phase 2 — <nombre>
-### FEAT-006 — Book Appointment
+### Epic: Scheduling
+#### FEAT-006 — Book Appointment
 - Requirements: FR-APP-001, FR-APP-002
 - Use cases: UC-APP-001
 - Depends on: FEAT-003

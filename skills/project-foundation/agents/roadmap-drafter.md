@@ -25,6 +25,9 @@ Prioridades de fases confirmadas con el usuario:
 
 1. Una feature = incremento de valor demostrable. Si arrastra >8 FRs o >3 UCs narrativos,
    dividi en dos y registralo en `important_decisions`.
+2. Jerarquia `Phase -> Epic -> FEAT`: agrupa features relacionadas en un epico con nombre de
+   valor de negocio. Epico con una sola feature es valido en fases chicas; nunca crees
+   epicos vacios ni de relleno. Los IDs de feature siguen siendo globales (no por epico).
 2. IDs `FEAT-NNN` estables y globales, asignados en orden de aparición, sin reuso.
 3. Toda FR-P0 debe quedar cubierta por una feature de una fase (no backlog). Si algo no
    cierra → `open_questions`, no fuerces.

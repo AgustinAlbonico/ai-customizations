@@ -56,6 +56,13 @@ de SYSTEM-DESIGN.md, sin ADR.
   draft completo a partir de las decisiones de las rondas (el orquestador NO redacta el
   documento entero inline).
 
+## Proceso
+
+1. Rondas de interacción (macro → dirección tecnológica → transversales), registrando
+   decisiones confirmadas.
+2. Delegar la redacción a system-design-drafter con las decisiones + inputs.
+3. Validar límite duro, ADRs (3 condiciones) y exit criteria.
+
 ## Template de SYSTEM-DESIGN.md
 
 ```markdown

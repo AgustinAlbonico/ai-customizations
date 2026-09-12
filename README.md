@@ -138,6 +138,33 @@ La IA adapta la profundidad de preguntas segun la clasificacion: MVP (8-12 pregu
 
 ---
 
+### `project-foundation` - Pipeline idea → proyecto listo para SDD
+
+**Que hace:**
+- Orquestador liviano con estado persistente (`.project-foundation/state.yaml`)
+- Recorre 12 fases: intake → research → producto → dominio → requisitos → use cases → UX/UI → system design → roadmap → auditoría → bootstrap → agent setup → sdd-init
+- Dos gates de congelamiento (product freeze / design freeze)
+- Carga UN contrato de fase por vez y delega el trabajo pesado a subagentes
+- Reanudable en sesiones nuevas sin historial conversacional
+- `/project-foundation feature FEAT-XXX` compila briefs del roadmap para iniciar SDD
+
+**Cuando usarlo:**
+- Queres arrancar un proyecto de software desde cero y dejarlo perfectamente definido
+- Antes de empezar a implementar features con Gentle AI + SDD
+
+**Como usarlo:**
+```text
+/project-foundation "mi idea"         # arranca el pipeline
+/project-foundation                    # reanuda desde el estado
+/project-foundation status             # dashboard
+/project-foundation install-pack       # instala pack curado de UX/UI y arquitectura
+/project-foundation feature FEAT-001  # brief para SDD
+```
+
+Requiere (fases 10-11): `project-starter` (modo technical-only) + `agentmd-generator`
+
+---
+
 ### `project-onboarding` - Skills para proyectos existentes
 
 **Que hace:**
@@ -287,6 +314,9 @@ npx skills add AgustinAlbonico/ai-customizations --skill agentmd-generator --age
 # Project Starter
 npx skills add AgustinAlbonico/ai-customizations --skill project-starter --agent opencode -y
 
+# Project Foundation (pipeline completo; requiere project-starter y agentmd-generator)
+npx skills add AgustinAlbonico/ai-customizations --skill project-foundation --agent opencode -y
+
 # Skill Sync
 npx skills add AgustinAlbonico/ai-customizations --skill skill-sync --agent opencode -y
 
@@ -330,6 +360,7 @@ Despues de instalar, usa los comandos:
 /prd "necesito un sistema de notificaciones"  # Genera un PRD interactivo
 /agentmd                                      # Genera AGENTS.md jerarquico
 /project-starter "descripcion"                # Bootstrap de proyecto nuevo
+/project-foundation "mi idea"                  # Pipeline completo idea → SDD-ready
 /verificar-spec 01-registrar-nutricionista.md # Prueba un spec y documenta errores
 ```
 

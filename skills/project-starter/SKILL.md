@@ -5,6 +5,8 @@ description: >
   Usa preguntas adaptativas con la herramienta `question` para recorrer desde la vision
   del producto hasta el bootstrap de la estructura inicial. Integra Context7 MCP para
   recomendar librerias, frameworks y herramientas actualizadas en cada etapa.
+  Soporta modo technical-only cuando es invocado por project-foundation: consume las
+  decisiones ya tomadas (SYSTEM-DESIGN.md) y solo completa stack y bootstrap.
   Trigger: Cuando el usuario quiere arrancar un proyecto nuevo, definir stack tecnico,
   inicializar un repositorio, o dice "nuevo proyecto", "project starter", "arrancar proyecto",
   "definir stack", "bootstrap proyecto".
@@ -15,6 +17,34 @@ metadata:
 ---
 
 # Protocolo project-starter
+
+## Modo technical-only (invocado desde project-foundation)
+
+Si al iniciarse se cumple ALGUNA de estas condiciones:
+
+1. Quien lo invoca indica explicitamente `modo technical-only` (fase 10 de project-foundation), o
+2. Existe `.project-foundation/state.yaml` con fase `bootstrap` en curso Y existe
+   `docs/architecture/SYSTEM-DESIGN.md`,
+
+entonces operar en modo technical-only:
+
+- **SKIP de FASE 1 completa** (el descubrimiento de producto ya lo hizo project-foundation).
+- **FASE 2**: leer `docs/architecture/SYSTEM-DESIGN.md` y consumirlo COMO CONSTRAINTS:
+  patron arquitectonico, monorepo/multirepo, superficies deployables, tipo de data stores,
+  estrategia de auth, lenguaje y familia de frameworks de direccion. NO re-preguntar lo ya
+  decidido; solo preguntar por gaps reales del documento (seccion pendiente o abierta).
+- **FASE 3 y 4**: normales, con Context7, eligiendo las librerias concretas que respeten los
+  constraints. Si una eleccion concreta contradice SYSTEM-DESIGN.md, detenerse, mostrar el
+  conflicto y resolverlo con el usuario antes de seguir.
+- **FASE 5**: el documento de decisiones debe REFERENCIAR SYSTEM-DESIGN.md y los ADRs como
+  origen de las decisiones macro; solo documentar como nuevas las decisiones de nivel
+  libreria/herramienta.
+- **FASE 6**: normal. La estructura debe reflejar los containers/componentes definidos en
+  SYSTEM-DESIGN.md.
+- Profundidad de preguntas segun `level` del state.yaml del pipeline (prototype/mvp/
+  production/internal), en lugar de la clasificacion propia de FASE 1.
+
+Si no se cumple ninguna condicion, seguir el flujo normal (standalone) desde FASE 1.
 
 ## Flujo general
 
@@ -55,9 +85,11 @@ FASE 6: Bootstrap / Inicializacion del Proyecto
 
 ---
 
-## FASE 1 — Descubrimiento del Proyecto (obligatoria)
+## FASE 1 — Descubrimiento del Proyecto (obligatoria; SKIP en modo technical-only)
 
 **Objetivo**: Entender que se quiere construir, para quien, y en que contexto.
+
+> En modo technical-only esta fase NO se ejecuta: el contexto viene del pipeline.
 
 ### Que explorar
 

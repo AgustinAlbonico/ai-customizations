@@ -32,11 +32,14 @@ Producir el estado inicial del pipeline y la captura cruda que alimenta a la fas
    - ¿Quiénes son los primeros usuarios? (opciones + abierta)
    - ¿Qué tipo de sistema es? (app web / mobile / API / CLI / interno / e-commerce / SaaS / ...)
    - ¿Restricciones conocidas? (deadline, presupuesto, equipo, compliance) — solo si el usuario no las mencionó
-3. Ronda 2 (máx 2 preguntas):
+3. Ronda 2 (máx 3 preguntas):
    - Proponer nivel esperado (prototype / mvp / production / internal) con justificación
      basada en las respuestas y pedir confirmación.
    - Si es relevante: "¿querés investigación de mercado/competencia?" → `research_mode`.
      Defaults por tipo: consumer/competitivo → needed; interno/herramienta propia → skipped.
+   - "¿Querés activar el pack potenciador de skills (UX/UI de alto nivel, arquitectura crítica, grill-me)?"
+     Si el usuario aprueba → instalar en segundo plano con `install-curated-pack` o `npx skills add ... -g -y`.
+     Si no → continuar con los templates base.
 4. Derivar `audit_depth` del nivel: prototype/internal → lite; mvp/production → full.
 5. Confirmar en un checkpoint de 5 líneas (modo, problema, usuarios, nivel, research).
 6. Escribir `.project-foundation/INTAKE.md` (captura cruda, no documento pulido):

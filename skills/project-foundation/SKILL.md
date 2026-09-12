@@ -43,6 +43,7 @@ a subagentes, validás resultados y persistís el avance.
 /project-foundation status                 # solo dashboard, no ejecuta nada
 /project-foundation review <fase>          # reabre una fase completada (cascada stale)
 /project-foundation feature FEAT-006       # compila feature brief → .scratch/feature-briefs/
+/project-foundation install-pack           # instala pack curado de superpoderes (UX/UI, arquitectura, grill-me)
 ```
 
 ## Mapa del pipeline
@@ -133,6 +134,21 @@ open_questions: [máx 5, solo las que bloquean]
 
 - Un subagente NUNCA devuelve documentos enteros al orquestador: escribe su output a su
   archivo y devuelve este handoff.
+
+## Inyección de Skills Potenciadoras (Pack Curado)
+
+Para evitar la "regresión a la media" de la IA (interfaces genéricas, arquitecturas de tutorial),
+`project-foundation` soporta inyección de skills de alta reputación (>100K installs):
+- **UX/UI (Fase 06)**: `design-taste-frontend`, `impeccable`, `web-design-guidelines`.
+- **Intake / Producto (Fases 00, 02)**: `grill-me` (interrogatorio socrático de Matt Pocock).
+- **Arquitectura (Fase 07)**: `improve-codebase-architecture` (modularidad y boundaries).
+
+Instalación automática:
+1. Durante la **Fase 00**, el orquestador pregunta una sola vez si querés instalarlas en lote.
+2. O ejecutando en cualquier momento `/project-foundation install-pack`.
+3. O en **Fase 06 (JIT)**: si falta la skill de diseño, el orquestador la instala al vuelo con
+   `npx -y skills add leonxlnx/taste-skill@design-taste-frontend -g -y`.
+Detalles completos en [references/curated-skills-pack.md](references/curated-skills-pack.md).
 
 ## Gates, rework y cascada stale
 

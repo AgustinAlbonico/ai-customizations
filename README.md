@@ -154,9 +154,10 @@ La IA adapta la profundidad de preguntas segun la clasificacion: MVP (8-12 pregu
 
 **Como usarlo:**
 ```text
-/project-foundation "mi idea"     # arranca el pipeline
-/project-foundation                # reanuda desde el estado
-/project-foundation status         # dashboard
+/project-foundation "mi idea"         # arranca el pipeline
+/project-foundation                    # reanuda desde el estado
+/project-foundation status             # dashboard
+/project-foundation install-pack       # instala pack curado de UX/UI y arquitectura
 /project-foundation feature FEAT-001  # brief para SDD
 ```
 

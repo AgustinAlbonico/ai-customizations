@@ -23,6 +23,21 @@ Fundamentos de UX/UI, NO diseño pantalla por pantalla.
 - `docs/architecture/*` (el diseño técnico no condiciona la experiencia global).
 - Diseño de pantallas concretas de features (eso nace en el SDD de cada feature).
 
+## Inyección de skills de diseño (JIT automático)
+
+Para evitar la "interfaz genérica de IA" (cards grises, layouts predecibles), esta fase
+aprovecha skills de diseño de alto nivel:
+- `leonxlnx/taste-skill@design-taste-frontend` (anti-generic UI, tipografía con carácter)
+- `pbakaus/impeccable@impeccable` (ojo crítico de jerarquía y consistencia)
+- `vercel-labs/agent-skills@web-design-guidelines` (densidad y componentes modernos)
+
+Al entrar a esta fase:
+- Si alguna está instalada → inyectar sus directrices en la redacción de UX-UI.md.
+- Si no hay ninguna → el orquestador instala automáticamente `design-taste-frontend` con:
+  `npx -y skills add leonxlnx/taste-skill@design-taste-frontend -g -y`
+  y continúa sin frenar el flujo. Si la instalación falla o no hay conexión, continúa con
+  el template base (degradación suave).
+
 ## Interacción (2-3 rondas de máx 4)
 
 Ronda 1 — plataforma y estrategia:

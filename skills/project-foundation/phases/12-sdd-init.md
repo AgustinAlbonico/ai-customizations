@@ -48,6 +48,12 @@ Pipeline completado. Este proyecto quedó listo para features vía SDD:
 - El brief generado alimenta: sdd-explore → sdd-new → spec → design → tasks → apply → verify
 ```
 
+## Exit criteria
+
+- SDD del entorno inicializado, O instrucciones de handoff entregadas (nunca simular SDD).
+- Mensaje final de ≤10 líneas mostrado al usuario.
+- `history` registra `pipeline completed`. `project-foundation` ya no es dueño de la implementación.
+
 ## Handoff → state.yaml
 
 ```yaml

@@ -13,89 +13,52 @@ scripts/                    # scripts de bootstrap/instalacion
 
 ## Skills disponibles
 
-### `interactive-bug` - Debug interactivo
+### `interactive-work` - Bugs y tareas con preguntas adaptativas
 
 **Que hace:**
-- Debug interactivo de bugs con preguntas adaptativas
+- Resuelve bugs Y tareas con un solo protocolo: preguntas adaptativas, confirmación corta, ejecución en un solo intento
+- Modo BUG: diagnostica y corrige (UI, API, datos, infra) con fix mínimo
+- Modo TAREA: aclara alcance IN/OUT y ejecuta (nuevo, cambio, refactor, config, mejora)
 - La IA te pregunta lo que necesita (multiple choice o abiertas)
-- Arregla en un solo intento sin back-and-forth
 
 **Cuando usarlo:**
-- Encontraste un bug pero no queres escribir un reporte detallado
-- Queres que la IA te guíe con preguntas específicas
-- Necesitas arreglar algo rapido sin pensar en el contexto
+- Algo no funciona y no queres escribir un reporte detallado (`/bug`)
+- Queres agregar/modificar/refactorizar sin escribir especificaciones (`/task`)
+- Preferis que la IA te pregunte lo que necesita en vez de adivinar
 
 **Como usarlo:**
-```
-/bug "descripcion corta del problema"
-```
-
-**Ejemplo:**
 ```
 /bug "el boton de logout no anda"
-```
-
-La IA te va a preguntar:
-- ¿Qué pasa exactamente cuando haces click?
-- ¿Dónde está el botón?
-- ¿Funcionaba antes?
-
-Vos respondes (elegis opciones o escribis), y la IA investiga y arregla.
-
----
-
-### `interactive-task` - Tareas interactivas
-
-**Que hace:**
-- Tareas interactivas (features, cambios, refactors) con preguntas adaptativas
-- La IA identifica el tipo de tarea y hace las preguntas correctas
-- Ejecuta correctamente en un solo intento
-
-**Cuando usarlo:**
-- Queres agregar/modificar/refactorizar algo
-- No queres escribir especificaciones detalladas
-- Preferis que la IA te pregunte lo que necesita
-
-**Como usarlo:**
-```
-/task "descripcion de la tarea"
-```
-
-**Ejemplos:**
-```
 /task "agregar dark mode"
-/task "refactorizar el componente de login"
-/task "cambiar el orden de las columnas en la tabla"
 ```
 
-La IA identifica si es NUEVO, CAMBIO, REFACTOR, CONFIG o MEJORA, y hace preguntas adaptadas.
+La IA clasifica el modo, hace hasta 4 preguntas, confirma el resumen/alcance y ejecuta.
 
 ---
 
-### `prd-creator` - Generador de PRDs interactivo
+### `feature-shaper` - Definidor de features (idea → PRD + Plan)
 
 **Que hace:**
-- Genera Product Requirements Documents (PRDs) completos a partir de una conversacion interactiva
-- Clasifica la complejidad del problema y adapta la cantidad de preguntas (0 a 20)
-- Output orientado a problemas de negocio y requisitos (NO tecnico, sin stacks especificos)
-- Guarda el PRD en `docs/prd/YYYY-MM-DD-<nombre>.md`
+- Transforma ideas vagas en definiciones estructuradas mediante conversacion adaptativa (6 fases: contexto, alcance, funcional, casos borde, tecnico, review)
+- Genera dos documentos en `docs/features/<slug>/`: `<slug>-prd.md` (negocio) y `<slug>-plan.md` (tecnico)
+- Etapa intermedia ideal antes de OpenSpec/SDD
 
 **Cuando usarlo:**
-- Queres documentar requisitos antes de empezar a construir
-- Tenes una idea o problema y queres un PRD estructurado
-- Necesitas alinear equipo sobre que se va a construir y por que
+- Tenes una idea vaga ("quiero un...") y necesitas alcance, RF y edge cases bien definidos
+- Queres un PRD de negocio + Plan tecnico listos para implementar
 
 **Como usarlo:**
 ```
-/prd "descripcion del problema o idea"
+/shape "mi idea"   # Flow completo: PRD + Plan en docs/features/<slug>/
+/prd "mi idea"      # Modo rápido: solo PRD de negocio en docs/prd/
 ```
 
-**Ejemplo:**
-```
-/prd "necesito un sistema de notificaciones para mi app"
-```
+**Modos:** `/shape` recorre las 6 fases y genera PRD + Plan técnico. `/prd` (absorbe al
+viejo `prd-creator`) genera solo el PRD de negocio, con clasificación de complejidad
+y banco de preguntas heredados (`references/question-bank.md`,
+`references/prd-only-template.md`).
 
-La IA explora el contexto del proyecto, te hace preguntas adaptativas segun la complejidad, y genera un PRD completo en `docs/prd/`.
+> Nota: la persistencia global `tools/feature-store/` (binario Go + MCP + TUI) descripta en `docs/plans/2026-03-04-feature-shaper-design.md` es roadmap y aun no esta implementada. El skill conversacional actual ya es usable sin ella.
 
 ---
 
@@ -173,7 +136,7 @@ Requiere (fases 10-11): `project-starter` (modo technical-only) + `agentmd-gener
 - Audita candidatos y bloquea señales peligrosas antes de instalar
 - Muestra una lista final y espera aprobacion humana
 - Instala skills localmente en `.agents/skills/` con `npx skills add`
-- Ejecuta `skill-sync` para mantener `AGENTS.md` actualizado
+- Actualiza las tablas de ruteo de `AGENTS.md` según la metadata de cada skill
 
 **Cuando usarlo:**
 - Ya tenes un proyecto empezado y queres configurarlo para trabajar con IA
@@ -186,7 +149,7 @@ Requiere (fases 10-11): `project-starter` (modo technical-only) + `agentmd-gener
 "configura skills para este repo"
 ```
 
-Manual completo: [`docs/project-onboarding-skill-sync.md`](docs/project-onboarding-skill-sync.md)
+Manual completo: [`docs/project-onboarding.md`](docs/project-onboarding.md)
 
 ---
 
@@ -212,101 +175,13 @@ Manual completo: [`docs/project-onboarding-skill-sync.md`](docs/project-onboardi
 
 ---
 
-### `sonarqube-quality-gate-playbook` - SonarQube
-
-Playbook iterativo para llevar proyectos Node y TypeScript (NestJS + React en monorepo) a cumplir Quality Gates de SonarQube.
-
----
-
-### `playwright-spec-verifier` - Verificacion visual de specs
-
-**Que hace:**
-- Lee un spec funcional y lo prueba con Playwright MCP contra el frontend.
-- Verifica flujo feliz, alternativos, network requests, consola y snapshots.
-- Documenta automaticamente errores en `iteracion 1/errores/<spec>.md`.
-
-**Cuando usarlo:**
-- Queres probar un archivo de iteracion contra el sistema real.
-- Necesitas comparar spec vs comportamiento visible sin revisar codigo.
-- Queres dejar un reporte reusable de errores funcionales y UI/UX.
-
-**Como usarlo:**
-```text
-/verificar-spec 01-registrar-nutricionista.md
-```
-
----
-
-### `skill-sync` - Auto-sync de AGENTS.md
-
-**Que hace:**
-- Mantiene las tablas de Skill Routing en AGENTS.md actualizadas automaticamente
-- Lee todos los `SKILL.md` y extrae `metadata.scope` + `metadata.auto_invoke`
-- Genera las secciones `### Auto-invoke Skills` sin intervencion manual
-- Inspirado en el sistema de Prowler Cloud
-
-**Cuando usarlo:**
-- Agreaste un skill nuevo y queres que aparezca en AGENTS.md
-- Modificaste el `metadata.auto_invoke` de un skill
-- Queres regenerar todas las tablas de routing
-
-**Como usarlo:**
-```powershell
-# Windows
-.\skills\skill-sync\assets\sync.ps1
-
-# macOS/Linux
-./skills/skill-sync/assets/sync.sh
-
-# Preview sin modificar
-.\skills\skill-sync\assets\sync.ps1 -DryRun
-```
-
-**Como funciona:**
-
-1. Cada skill tiene metadata en su `SKILL.md`:
-```yaml
-metadata:
-  scope: [root]
-  auto_invoke:
-    - "Creating API endpoints"
-    - "Adding database queries"
-```
-
-2. El script escanea todos los skills y genera las tablas automaticamente
-
-3. Se crea/actualiza la seccion `### Auto-invoke Skills` en los AGENTS.md correspondientes
-
-**Scopes disponibles:**
-
-| Scope | Actualiza |
-|-------|-----------|
-| `root` | `AGENTS.md` (raiz del repo) |
-| `frontend` | `frontend`, `web`, `client`, `apps/frontend`, `apps/web`, `apps/client` |
-| `backend` | `backend`, `api`, `server`, `apps/backend`, `apps/api`, `apps/server` |
-| `shared` | `packages/shared`, `shared`, `common`, `packages/common` |
-| custom | Directorio definido en `.agents/skill-scopes.json` |
-
-**Instalacion:**
-```powershell
-npx skills add AgustinAlbonico/ai-customizations --skill skill-sync --agent opencode -y
-```
-
----
-
 ## Instalacion
 
 ### Opcion 1: Instalar skills individuales
 
 ```powershell
-# Bug interactivo
-npx skills add AgustinAlbonico/ai-customizations --skill interactive-bug --agent opencode -y
-
-# Task interactivo
-npx skills add AgustinAlbonico/ai-customizations --skill interactive-task --agent opencode -y
-
-# PRD Creator
-npx skills add AgustinAlbonico/ai-customizations --skill prd-creator --agent opencode -y
+# Trabajo interactivo (bugs + tareas)
+npx skills add AgustinAlbonico/ai-customizations --skill interactive-work --agent opencode -y
 
 # Init Deep (AGENTS.md jerarquico)
 npx skills add AgustinAlbonico/ai-customizations --skill agentmd-generator --agent opencode -y
@@ -317,14 +192,12 @@ npx skills add AgustinAlbonico/ai-customizations --skill project-starter --agent
 # Project Foundation (pipeline completo; requiere project-starter y agentmd-generator)
 npx skills add AgustinAlbonico/ai-customizations --skill project-foundation --agent opencode -y
 
-# Skill Sync
-npx skills add AgustinAlbonico/ai-customizations --skill skill-sync --agent opencode -y
+# Feature Shaper (idea -> PRD + Plan)
+npx skills add AgustinAlbonico/ai-customizations --skill feature-shaper --agent opencode -y
 
 # Project Onboarding
 npx skills add AgustinAlbonico/ai-customizations --skill project-onboarding --agent opencode -y
 
-# Playwright Spec Verifier
-npx skills add AgustinAlbonico/ai-customizations --skill playwright-spec-verifier --agent opencode -y
 ```
 
 ### Opcion 2: Instalar todas las skills
@@ -357,11 +230,11 @@ Despues de instalar, usa los comandos:
 ```text
 /bug "el carrito no actualiza el total"
 /task "agregar dark mode"
-/prd "necesito un sistema de notificaciones"  # Genera un PRD interactivo
+/prd "necesito un sistema de notificaciones"  # PRD de negocio (feature-shaper)
 /agentmd                                      # Genera AGENTS.md jerarquico
 /project-starter "descripcion"                # Bootstrap de proyecto nuevo
 /project-foundation "mi idea"                  # Pipeline completo idea → SDD-ready
-/verificar-spec 01-registrar-nutricionista.md # Prueba un spec y documenta errores
+/shape "mi idea"                              # Define feature (PRD + Plan)
 ```
 
 La IA va a hacerte preguntas interactivas con opciones multiple choice o abiertas según lo que necesite saber.
@@ -383,6 +256,12 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install-skills.ps1 -Source Ag
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\bootstrap-project.ps1 -ProjectPath "C:\ruta\tu-proyecto"
 ```
+
+```bash
+./scripts/bootstrap-project.sh /ruta/tu-proyecto
+```
+
+Copia `commands/*.md` a `.opencode/commands/` y `hooks/*.ps1` a `.opencode/hooks/` del proyecto destino.
 
 ## Validacion local
 

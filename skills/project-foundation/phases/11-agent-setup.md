@@ -37,13 +37,15 @@ Preguntar UNA vez: "¿Querés que instale skills recomendadas para el stack dete
 (descubrimiento + auditoría + aprobación antes de instalar)?"
 
 - SÍ → invocar `project-onboarding` tal cual (detect-stack → npx skills find → auditoría
-  SAFE/REVIEW/BLOCKED → aprobación → instalación → skill-sync).
+  SAFE/REVIEW/BLOCKED → aprobación → instalación → ruteo manual a AGENTS.md).
 - NO → registrar en history y continuar. Se puede correr después manualmente.
 
-## Paso 3 — skill-sync
+## Paso 3 — Ruteo
 
-Tras cualquier instalación de skills, correr skill-sync para regenerar las tablas
-auto-invoke en los AGENTS.md (o dejar que project-onboarding lo haga en su fase 4).
+Tras cualquier instalación de skills, el agente actualiza las tablas auto-invoke
+de los AGENTS.md según la metadata `scope` + `auto_invoke` de cada skill instalada
+(o deja que project-onboarding lo haga en su fase 4). Sin scripts externos: leer
+metadata, resolver AGENTS.md destino por scope, agregar fila sin duplicar.
 
 ## Interacción
 

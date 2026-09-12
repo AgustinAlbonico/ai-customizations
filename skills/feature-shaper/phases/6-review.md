@@ -4,9 +4,9 @@
 
 Mostrar un resumen ejecutivo de todo lo que se va a implementar, en formato digerible.
 
-## REGLA: NO dokument dump
+## REGLA: nada de document dump
 
-**No mostrar los documentos.md completos.** Solo un resumen executivo.
+**No mostrar los .md completos.** Solo un resumen ejecutivo.
 
 ---
 

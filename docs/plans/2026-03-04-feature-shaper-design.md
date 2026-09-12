@@ -1,7 +1,7 @@
 # feature-shaper — Design Document
 
 > **Fecha**: 2026-03-04  
-> **Estado**: Diseño completo, listo para implementar  
+> **Estado**: Skill conversacional implementado y usable (`skills/feature-shaper/`). Persistencia `tools/feature-store/` (binario Go + MCP + TUI) = roadmap, aún no implementado.  
 > **Autor**: Agustín Albonico  
 
 ---
@@ -863,7 +863,7 @@ description: [descripción corta]
 [Instrucciones en texto plano para el agente]
 ```
 
-### Patrón de SKILL.md (referencia: `skills/interactive-task/SKILL.md`)
+### Patrón de SKILL.md (referencia: `skills/interactive-work/SKILL.md`)
 ```markdown
 ---
 name: [nombre-del-skill]

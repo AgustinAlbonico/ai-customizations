@@ -1,21 +1,22 @@
-# Project Onboarding + Skill Sync
+# Project Onboarding
 
-Este flujo configura skills locales para un proyecto existente y mantiene sus `AGENTS.md` sincronizados sin depender de una estructura fija como `apps/frontend` o `apps/backend`.
+Este flujo configura skills locales para un proyecto existente y deja sus
+`AGENTS.md` ruteados sin depender de una estructura fija como `apps/frontend`
+o `apps/backend`.
 
 ## Quick Path
 
-1. Instala `project-onboarding` y `skill-sync` en el proyecto destino.
+1. Instala `project-onboarding` en el proyecto destino.
 2. Ejecuta onboarding para detectar stack, componentes y scopes reales.
 3. Deja que `project-onboarding` busque skills con `npx skills find`, las audite y te muestre el listado final.
 4. Confirma las skills aprobadas antes de instalar.
-5. Ejecuta `skill-sync` en dry-run y luego en modo escritura.
-6. Verifica que cada `AGENTS.md` tenga la tabla `### Auto-invoke Skills` correcta.
+5. El agente actualiza cada `AGENTS.md` con la tabla `### Auto-invoke Skills` según la metadata de cada skill.
+6. Verifica que cada `AGENTS.md` tenga la tabla correcta y sin duplicados.
 
 ## Install
 
 ```powershell
 npx skills add AgustinAlbonico/ai-customizations --skill project-onboarding --agent opencode -y
-npx skills add AgustinAlbonico/ai-customizations --skill skill-sync --agent opencode -y
 ```
 
 La instalacion esperada es local al proyecto, en `.agents/skills/`. No uses instalacion global para este flujo si queres que el repo sea reproducible.
@@ -32,7 +33,7 @@ La instalacion esperada es local al proyecto, en `.agents/skills/`. No uses inst
 | Audit | Deduplica candidatos y aplica `references/security-filter.md` |
 | Approval | Muestra `SAFE`, `REVIEW` y `BLOCKED`; espera aprobación humana |
 | Install | Usa `npx skills add <owner/repo> --skill <skill-name> --agent opencode -y` solo para aprobadas |
-| Route | Ejecuta `skill-sync` para actualizar `AGENTS.md` |
+| Route | El agente lee `metadata.scope` + `metadata.auto_invoke` y actualiza los `AGENTS.md` manualmente |
 
 ## Detection Scripts
 
@@ -67,10 +68,6 @@ Salida esperada:
 }
 ```
 
-## Skill Sync
-
-`skill-sync` lee la metadata de cada `SKILL.md` y genera tablas de routing en el `AGENTS.md` correspondiente.
-
 ## Discovery Seguro
 
 `project-onboarding` no instala durante la búsqueda. Primero genera queries desde el stack detectado:
@@ -91,7 +88,9 @@ Luego clasifica candidatos:
 
 La política completa vive en `.agents/skills/project-onboarding/references/security-filter.md`.
 
-Metadata requerida:
+## Ruteo a AGENTS.md
+
+Sin scripts externos. Para cada skill instalada, el agente lee su metadata:
 
 ```yaml
 metadata:
@@ -101,19 +100,10 @@ metadata:
     - "Writing NestJS modules"
 ```
 
-Windows:
-
-```powershell
-.\.agents\skills\skill-sync\assets\sync.ps1 -DryRun
-.\.agents\skills\skill-sync\assets\sync.ps1 -AutoAddMetadata
-```
-
-macOS/Linux:
-
-```bash
-./.agents/skills/skill-sync/assets/sync.sh --dry-run
-./.agents/skills/skill-sync/assets/sync.sh --auto-add-metadata
-```
+Y actualiza la sección `### Auto-invoke Skills` del `AGENTS.md` correspondiente
+(raíz para `root`, componente para `frontend`/`backend`/`shared`, u
+`.agents/skill-scopes.json` para scopes propios). Si la skill no trae metadata,
+el agente la propone según el componente y la agrega al `SKILL.md`.
 
 ## Dynamic Scopes
 
@@ -141,20 +131,9 @@ Para scopes propios, agrega `.agents/skill-scopes.json`:
 
 | Symptom | Fix |
 |---------|-----|
-| `npx skills.sh` falla con 404 | Usa `npx skills add`, no `npx skills.sh install` |
-| Skill no aparece en `AGENTS.md` | Verifica `metadata.scope` y `metadata.auto_invoke` |
+| `npx skills find` falla con 404 | Revisa el nombre del source y la conexión |
+| Skill no aparece en `AGENTS.md` | Verifica `metadata.scope` y `metadata.auto_invoke`, agregalos a mano |
 | Scope no encuentra carpeta | Usa un path conocido o `.agents/skill-scopes.json` |
-| No queres crear `AGENTS.md` automaticamente | Usa `-NoCreateAgents` o `--no-create-agents` |
-| Queres revisar antes de escribir | Usa `-DryRun` o `--dry-run` |
-
-## Difference From Prowler
-
-| Prowler | This Repo |
-|---------|-----------|
-| Scopes fijos como `ui`, `api`, `sdk`, `mcp_server` | Scopes dinamicos por estructura real |
-| `sync.sh` pensado para su repo | `sync.ps1` y `sync.sh` reutilizables |
-| Skill hub `prowler` | `AGENTS.md` funciona como hub del proyecto |
-| Metadata manual | `-AutoAddMetadata` / `--auto-add-metadata` puede completar defaults |
 
 ## Verification Checklist
 
@@ -163,6 +142,5 @@ Para scopes propios, agrega `.agents/skill-scopes.json`:
 - [ ] Las skills candidatas fueron deduplicadas y auditadas antes de instalar.
 - [ ] El usuario aprobó explícitamente el listado final.
 - [ ] Las skills elegidas existen en el source antes de instalar.
-- [ ] `skill-sync` en dry-run muestra los `AGENTS.md` esperados.
-- [ ] `skill-sync` en modo escritura actualiza o crea solo los `AGENTS.md` esperados.
+- [ ] Cada `AGENTS.md` tiene su tabla `### Auto-invoke Skills` actualizada.
 - [ ] No hay filas duplicadas en `### Auto-invoke Skills`.

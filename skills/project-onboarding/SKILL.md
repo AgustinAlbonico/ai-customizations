@@ -27,7 +27,8 @@ Automatizar el setup de skills en proyectos existentes mediante:
 1. Detección automática del stack tecnológico
 2. Discovery global de skills con `npx skills find`
 3. Auditoría de seguridad antes de instalar
-4. Instalación y ruteo automático a AGENTS.md después de aprobación humana
+4. Instalación y ruteo a AGENTS.md después de aprobación humana (el agente actualiza
+   las tablas de ruteo manualmente según la metadata de cada skill)
 
 ## Flujo general
 
@@ -42,7 +43,7 @@ FASE 3: Aprobación e Instalación
     | muestra lista final, espera aprobación explícita e instala
     v
 FASE 4: Ruteo
-    | ejecuta skill-sync para actualizar AGENTS.md
+    | el agente actualiza AGENTS.md según metadata scope/auto_invoke
     v
 FASE 5: Post-instalación
     | verifica instalación, metadata y AGENTS.md
@@ -55,7 +56,7 @@ FASE 5: Post-instalación
 1. **SIEMPRE usar herramienta `question`** para confirmar acciones — nunca asumir
 2. **NO instalar sin confirmación** — siempre mostrar lista y pedir approval
 3. **Detectar scopes dinámicos** — basados en carpetas reales del proyecto
-4. **Usar skill-sync local** — copiar de ai-customizations si no existe
+4. **Rutear manualmente** — el agente lee `metadata.scope` + `metadata.auto_invoke` de cada skill instalada y actualiza las tablas de los AGENTS.md correspondientes (sin scripts externos)
 5. **Respetar estructura existente** — no reorganizar carpetas del proyecto
 6. **Mostrar progreso** — feedback visual en cada fase
 7. **NO instalar durante discovery** — `npx skills find` solo recopila candidatos
@@ -309,14 +310,7 @@ Si el usuario elige una skill `REVIEW`, pedir confirmación explícita mencionan
 
 ## FASE 3 — Aprobación e Instalación
 
-**Objetivo**: Preparar skill-sync, validar que las skills aprobadas sigan disponibles e instalarlas solo después de aprobación humana.
-
-### Pre-requisitos
-
-1. Verificar que `.agents/scripts/sync.ps1` exista
-   - Si no existe, copiar desde `ai-customizations/skills/skill-sync/assets/sync.ps1`
-2. Verificar que `.agents/skills/skill-sync/` exista
-   - Si no existe, copiar desde `ai-customizations/skills/skill-sync/`
+**Objetivo**: Validar que las skills aprobadas sigan disponibles e instalarlas solo después de aprobación humana.
 
 ### Proceso de instalación
 
@@ -375,17 +369,20 @@ metadata:
 
 ## FASE 4 — Ruteo
 
-**Objetivo**: Actualizar AGENTS.md con las skills instaladas.
+**Objetivo**: Actualizar AGENTS.md con las skills instaladas, manualmente.
 
-### Ejecutar skill-sync
+### Cómo rutear (sin scripts externos)
 
-```powershell
-# Windows
-.\.agents\scripts\sync.ps1 -AutoAddMetadata
+Para cada skill instalada, el agente:
 
-# Linux/Mac
-./.agents/scripts/sync.sh --auto-add-metadata
-```
+1. Lee su `SKILL.md` y extrae `metadata.scope` + `metadata.auto_invoke`.
+   Si no tiene metadata, la propone según el componente instalado y la agrega.
+2. Resuelve el AGENTS.md destino según el scope:
+   `root` → `AGENTS.md` raíz; `frontend`/`backend`/`shared` → el AGENTS.md del
+   componente (o el raíz si el proyecto no tiene jerarquía); scopes propios →
+   `.agents/skill-scopes.json` si existe.
+3. Agrega o actualiza la sección `### Auto-invoke Skills` con una fila por skill:
+   trigger (de `auto_invoke`) + ruta de la skill. No duplicar filas existentes.
 
 ### Verificación
 
@@ -427,27 +424,22 @@ AGENTS.md actualizados:
 - [ ] Candidatos deduplicados y auditados antes de instalar
 - [ ] Usuario aprobó explícitamente la lista final
 - [ ] Metadata agregada a cada skill (scope + auto_invoke)
-- [ ] skill-sync ejecutado sin errores
-- [ ] AGENTS.md actualizados con tablas Auto-invoke
+- [ ] AGENTS.md actualizados con tablas Auto-invoke (sin duplicados)
 - [ ] Scopes dinámicos detectados correctamente
 
 ### Problemas comunes
 
 | Problema | Solución |
 |----------|----------|
-| Skill no aparece en AGENTS.md | Verificar que tenga metadata (scope + auto_invoke) |
-| Scope no detectado | Verificar que la carpeta exista y tenga package.json |
-| skill-sync falla | Ejecutar con `-DryRun` para ver qué haría |
-| Duplicados en tabla | Limpiar metadata duplicada en SKILL.md |
+| Skill no aparece en AGENTS.md | Verificar que tenga metadata (scope + auto_invoke) y agregarla manualmente |
+| Scope no detectado | Verificar que la carpeta exista y tenga manifiesto (package.json, etc.) |
+| Duplicados en tabla | Limpiar filas duplicadas en el AGENTS.md |
 
 ### Comando de diagnóstico
 
-```powershell
-# Ver skills sin metadata
-.\.agents\scripts\sync.ps1 -DryRun
-
-# Ver qué actualizaría
-.\.agents\scripts\sync.ps1 -DryRun -AutoAddMetadata
+```bash
+# Ver skills instaladas sin metadata scope/auto_invoke
+grep -L "scope:" .agents/skills/*/SKILL.md
 ```
 
 ---
@@ -495,4 +487,3 @@ project-starter → define stack + bootstrap → project-onboarding → instala 
 - **Tabla de mapeo**: Ver [references/stack-mapping.md](references/stack-mapping.md)
 - **Filtro de seguridad**: Ver [references/security-filter.md](references/security-filter.md)
 - **Script de detección**: Ver [assets/detect-stack.ps1](assets/detect-stack.ps1)
-- **Skill-sync**: Ver [../skill-sync/SKILL.md](../skill-sync/SKILL.md)

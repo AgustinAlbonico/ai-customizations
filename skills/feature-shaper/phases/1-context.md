@@ -15,14 +15,14 @@ Opciones:
 - Optimizar algo que hoy es manual o lento
 - Notificar al usuario de algo importante
 - Empoderar al admin con más control
-- Outro: ___
+- Otro: ___
 
 ### 2. Beneficiario
 "¿A quién le sirve principalmente?"
-- Usuario final (front-office)
+- Usuario final
 - Admin / operador back-office
 - Superadmin
-- Profesional de salud
+- Rol específico del dominio: ___
 - Otro: ___
 
 ### 3. Éxito

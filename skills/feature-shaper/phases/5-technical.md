@@ -11,7 +11,7 @@ INVOCAR subagente ANTES de hacer preguntas:
 ```
 task {
   subagent_type: "sdd-design",
-  prompt: "Explora el codebase actual. Prioriza apps/backend/src/ y apps/frontend/src/. Identifica:\n1. Stack tecnológico exacto (versiones, librerías clave)\n2. Patrones de arquitectura (Clean Architecture? Hexagonal? Capas usadas?)\n3. Convenciones de código (nombres, imports, estructura de carpetas)\n4. Estructura de módulos backend (qué módulos existen, cómo se organizan)\n5. APIs REST existentes (versión, formato, auth)\n6. Modelo de datos (TypeORM/Prisma, entidades principales)\n7. Integraciones externas (Redis, BullMQ, Socket.IO, Telegram, etc.)\n8. Shared package (@nutrifit/shared) — qué contiene\n9. Frontend: store (Zustand/Redux?), API layer (RTK Query?), routing, components principales\n10. Cualquier cosa que sería relevante para diseñar un nuevo feature module desde cero\n\nReturn un resumen estructurado con suficiente detalle para tomar decisiones técnicas fundadas."
+  prompt: "Explora el codebase actual. Prioriza los directorios de backend y frontend (ej: apps/backend/src/ y apps/frontend/src/, o equivalentes según el repo). Identifica:\n1. Stack tecnológico exacto (versiones, librerías clave)\n2. Patrones de arquitectura (Clean Architecture? Hexagonal? Capas usadas?)\n3. Convenciones de código (nombres, imports, estructura de carpetas)\n4. Estructura de módulos backend (qué módulos existen, cómo se organizan)\n5. APIs existentes (versión, formato, auth)\n6. Modelo de datos (ORM usado, entidades principales)\n7. Integraciones externas (colas, realtime, notificaciones, etc.)\n8. Packages compartidos (shared/common) — qué contienen\n9. Frontend: store, API layer, routing, componentes principales\n10. Cualquier cosa que sería relevante para diseñar un nuevo feature module desde cero\n\nReturn un resumen estructurado con suficiente detalle para tomar decisiones técnicas fundadas. Adaptar los paths al repo real; nunca hardcodear nombres de proyectos o packages concretos."
 }
 ```
 
@@ -20,7 +20,7 @@ task {
 Con el output del subagente, preguntar SOLO lo necesario:
 
 ### 1. Stack confirmar o sugerir
-"¿Confirmamos [Node/NestJS + React + MySQL/PostgreSQL] o hay variante?"
+"¿Confirmamos el stack detectado ([stack del subagente]) o hay variante?"
 - Confirmar: ___
 - Cambiar a: ___
 
